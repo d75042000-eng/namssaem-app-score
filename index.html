@@ -227,6 +227,19 @@
   .stat-card .stat-bar{ position:absolute; left:0; top:0; bottom:0; width:4px; }
   .stat-bar.green{ background:var(--green); } .stat-bar.amber{ background:var(--amber);} .stat-bar.red{background:var(--red);} .stat-bar.ink{background:var(--ink);} .stat-bar.watch{background:var(--watch);}
 
+  /* ---------- 경영 대시보드: 수평 막대 ---------- */
+  .hbar-row{ display:flex; align-items:center; gap:12px; padding:6px 0; }
+  .hbar-label{ width:118px; flex-shrink:0; font-size:13px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .hbar-track{ flex:1; height:10px; background:var(--paper-2); border-radius:6px; overflow:hidden; }
+  .hbar-fill{ height:100%; border-radius:6px; background:var(--brass); }
+  .hbar-fill.ink{ background:var(--ink-3); }
+  .hbar-num{ width:38px; text-align:right; font-size:13px; font-weight:700; color:var(--text-strong); flex-shrink:0; }
+  .kpi-row2{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-bottom:20px; }
+  .mini-stat{ background:var(--card); border:1px solid var(--paper-line); border-radius:var(--radius); padding:18px 20px; }
+  .mini-stat .lbl{ font-size:12px; color:var(--text-soft); font-weight:600; }
+  .mini-stat .val{ font-family:'Noto Serif KR', serif; font-size:28px; font-weight:700; color:var(--text-strong); margin-top:4px; }
+  .mini-stat .sub{ font-size:11.5px; color:var(--text-soft); margin-top:6px; }
+
   /* ---------- Utility ---------- */
   .flex{ display:flex; align-items:center; }
   .gap-8{ gap:8px; } .gap-10{ gap:10px; } .gap-14{ gap:14px; }
@@ -305,6 +318,16 @@
   .status-btn.sel-warn{ background:var(--amber-bg); border-color:var(--amber); color:var(--amber); }
   .status-btn.sel-bad{ background:var(--red-bg); border-color:var(--red); color:var(--red); }
 
+  /* 영상숙제: 챕터별 한 화면 체크용 셀렉트 */
+  .vsel-cell{ padding:6px 8px !important; }
+  .vsel{ width:100%; min-width:96px; padding:7px 6px; border-radius:7px; border:1.5px solid #e1ddd0; font-size:12px; font-weight:600; background:#fff; color:var(--text-soft); appearance:none; -webkit-appearance:none; text-align:center; }
+  .vsel.vsel-ok{ background:var(--green-bg); border-color:var(--green); color:var(--green); }
+  .vsel.vsel-warn{ background:var(--amber-bg); border-color:var(--amber); color:var(--amber); }
+  .vsel.vsel-bad{ background:var(--red-bg); border-color:var(--red); color:var(--red); }
+  .video-chapter-head{ display:flex; flex-direction:column; align-items:center; gap:2px; }
+  .video-chapter-head .cnt{ font-size:10.5px; font-weight:600; color:var(--text-soft); }
+  .video-chapter-head .cnt.done{ color:var(--green); }
+
   .divider{ height:1px; background:var(--paper-line); margin:18px 0; }
 
   .checklist-row{ display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid #f1efe7;}
@@ -326,17 +349,30 @@
   }
   @media (max-width: 760px){
     #app{ flex-direction:column; }
-    .sidebar{ width:100%; height:auto; position:relative; flex-direction:row; align-items:center; overflow-x:auto; }
-    .sidebar-brand{ border-bottom:none; border-right:1px solid var(--ink-line); flex-shrink:0; }
-    .sidebar-nav{ display:flex; padding:8px; }
-    .nav-section-label{ display:none; }
-    .nav-item{ flex-direction:column; font-size:10.5px; gap:4px; padding:8px 10px; white-space:nowrap;}
+    .sidebar{ width:100%; height:auto; position:relative; flex-direction:column; align-items:stretch; }
+    .sidebar-brand{ border-bottom:1px solid var(--ink-line); flex-shrink:0; position:relative; }
+    .mobile-nav-toggle{ display:flex; margin-left:auto; background:transparent; border:none; color:#eef0f2; padding:6px; }
+    .sidebar-nav{
+      display:none; flex-direction:column; padding:8px;
+      position:absolute; top:100%; left:0; right:0; z-index:60;
+      background:var(--ink); max-height:70vh; overflow-y:auto;
+      box-shadow:0 12px 30px rgba(0,0,0,0.35);
+    }
+    .sidebar-nav.mobile-open{ display:flex; }
+    .nav-item{ flex-direction:row; font-size:14px; gap:11px; padding:12px 14px; white-space:nowrap;}
     .sidebar-footer{ display:none; }
     .topbar{ padding:16px 18px; flex-direction:column; align-items:flex-start; gap:10px;}
     .content{ padding:18px; }
     .stat-grid{ grid-template-columns:1fr 1fr; }
   }
+  .mobile-nav-toggle{ display:none; cursor:pointer; }
+  .mobile-only-navitem{ display:none; }
+  @media (max-width: 760px){
+    .mobile-only-navitem{ display:flex; border-top:1px solid var(--ink-line); margin-top:6px; padding-top:14px; }
+  }
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -363,6 +399,9 @@
         <div class="title">남쌤 ERC 학원</div>
         <div class="sub">시험 · 숙제 체크</div>
       </div>
+      <button class="mobile-nav-toggle" id="mobile-nav-toggle" onclick="toggleMobileNav()" aria-label="메뉴 열기">
+        <svg viewBox="0 0 24 24" fill="none" width="22" height="22"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
     </div>
     <nav class="sidebar-nav" id="sidebar-nav"></nav>
     <div class="sidebar-footer">
@@ -406,13 +445,13 @@
 <script>
 /* =========================================================================
    남쌤 ERC 학원 · 시험·숙제 체크 웹앱
-   - 데이터는 window.storage(공유)에 저장되어 원장/조교가 같은 데이터를 봅니다.
+   - 데이터는 Firebase(Firestore)에 저장되어 원장/조교가 어느 기기에서 접속해도 같은 데이터를 실시간으로 봅니다.
    - 화면은 하나의 HTML 안에서 JS로 전환합니다 (SPA 방식).
    ========================================================================= */
 
 /* ---------------------- 1. 상수/메타 데이터 ---------------------- */
 
-const CLASSES = ['A','B','C','D','E','F','G','H','I','J','K','L','M'];
+const CLASSES = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N'];
 
 // 실제 'ERC_영상숙제검사' 파일에서 그대로 추출한 반별 학생 명단 (이름, 학년)
 // G·H·I반은 해당 검사지에 데이터가 없어 비워둡니다 — 원생 목록 화면에서 직접 등록해주세요.
@@ -430,6 +469,7 @@ const CLASS_ROSTER = {
   K: [["진후",2], ["로운",2], ["다연",3], ["효담",3], ["유찬",3], ["보민",3], ["동혁",3], ["다혜",4]],
   L: [["현민",2], ["지원",3], ["지후",4], ["지윤",4], ["정호",4], ["현아",5], ["서윤",5], ["아영",5], ["기범",5], ["예준",6]],
   M: [["루아",3], ["수호",4], ["준호",4], ["지안",4], ["다현",4], ["연우",5], ["소현",5], ["호영",5], ["민준",5], ["유담",6], ["진우",5]],
+  N: [],
 };
 
 // 시험 종류 메타 정보. type: 'score'=점수 채점, 'pass'=통과여부, 'level'=레벨 통과
@@ -458,6 +498,7 @@ const CLASS_EXAMS = {
   K:['alpha','monthly','erc','evt','phonics'],
   L:['alpha','monthly','erc','evt'],
   M:['alpha','monthly','erc','evt','word_meaning','word_pron'],
+  N:['alpha','monthly','erc','evt','word_meaning','word_pron'],
 };
 
 const WRITING_STATUS = ['제출완료','현장보완','미제출'];
@@ -476,9 +517,9 @@ const VIDEO_STATUS = ['정상제출','자세불량','길이미달','잘못된영
 
 // 검사지에 있던 반별 수업 시간 (참고용 표시)
 const CLASS_TIME = {
-  A:'2:00 - 3:25', B:'2:00 - 3:25', C:'2:45 - 4:10', D:'2:00 - 3:25',
-  E:'4:15 - 5:40', F:'5:00 - 6:25', J:'4:15 - 5:40', K:'2:45 - 4:10',
-  L:'5:00 - 6:25', M:'4:15 - 5:40',
+  A:'2:00 - 3:25', B:'2:00 - 3:25', C:'2:45 - 4:10', D:'3:30 - 4:55',
+  E:'4:15 - 5:40', F:'5:00 - 6:25', G:'5:45 - 7:10', H:'6:30 - 9:30', I:'6:30 - 9:30',
+  J:'4:15 - 5:40', K:'2:45 - 4:10', L:'5:00 - 6:25', M:'4:15 - 5:40',
 };
 // 실제 검사지에는 A,B,C,D,E,F,J,K,L,M 10개 반만 있었음 (G,H,I는 영상숙제 대상 아님 — 설정에서 조정 가능)
 let CLASS_HAS_VIDEO = ['A','B','C','D','E','F','J','K','L','M'];
@@ -497,7 +538,21 @@ const STATUS_META = {
 
 /* ---------------------- 2. 데이터베이스 (공유 저장소) ---------------------- */
 
-const STORAGE_KEY = 'namssaem-erc-db-v3';
+const STORAGE_KEY = 'namssaem-erc-db-v3'; // 백업 파일 안의 버전 표시용으로만 사용
+
+// ---- Firebase 설정 ----
+const firebaseConfig = {
+  apiKey: "AIzaSyCWPHppxZVFfsC4TaX-cyQh-4lKFdajaes",
+  authDomain: "namssaem-erc.firebaseapp.com",
+  projectId: "namssaem-erc",
+  storageBucket: "namssaem-erc.firebasestorage.app",
+  messagingSenderId: "57879799376",
+  appId: "1:57879799376:web:0d22a0ffc11d99b2d01355",
+  measurementId: "G-04KK2PT9QY"
+};
+firebase.initializeApp(firebaseConfig);
+const firestore = firebase.firestore();
+const FIRESTORE_DOC = firestore.collection('app_data').doc('main');
 
 let DB = {
   students: [],
@@ -521,7 +576,7 @@ let DB = {
 };
 
 let currentRole = null;
-let currentView = 'dashboard';
+let currentView = 'overview';
 
 function uid(prefix){ return prefix + '_' + Math.random().toString(36).slice(2,9); }
 
@@ -535,9 +590,12 @@ function seedDemoData(){
         school: '',
         grade,
         className: cls,
+        attendanceNo: '',
         parentPhone: '',
         studentPhone: '',
         registeredAt: '',
+        address: '',
+        referralSource: '',
         notes: '',
         status: '재원',
         statusNote: '',
@@ -607,26 +665,46 @@ function isRecent(iso, mins){ if(!iso) return false; return (Date.now()-new Date
 
 async function loadDB(){
   try{
-    const res = await window.storage.get(STORAGE_KEY, true);
-    if(res && res.value){
-      const parsed = JSON.parse(res.value);
+    const snap = await FIRESTORE_DOC.get();
+    if(snap.exists){
+      const parsed = snap.data();
       DB = Object.assign(DB, parsed);
       return true;
     }
-  }catch(e){ /* 키가 없으면 새로 시작 */ }
+  }catch(e){ console.error('불러오기 실패', e); }
   return false;
 }
 
 async function saveDB(){
   try{
-    if(!window.storage) throw new Error('storage API 없음 (Claude.ai 밖에서 열었을 가능성)');
-    await window.storage.set(STORAGE_KEY, JSON.stringify(DB), true);
+    // Firestore는 undefined 값을 허용하지 않으므로 JSON 왕복으로 안전하게 정리합니다
+    const clean = JSON.parse(JSON.stringify(DB));
+    await FIRESTORE_DOC.set(clean);
     return true;
   }catch(e){
     console.error('저장 실패', e);
-    toast('저장 중 문제가 발생했어요. Claude.ai 안에서 열려 있는지 확인해주세요.', true);
+    toast('저장 중 문제가 발생했어요. 인터넷 연결을 확인해주세요.', true);
     return false;
   }
+}
+
+// 다른 조교/원장이 저장하면 실시간으로 화면에 반영됩니다
+let _suppressNextSnapshot = false;
+function startRealtimeSync(){
+  FIRESTORE_DOC.onSnapshot(snap=>{
+    if(!snap.exists) return;
+    // 비고란(영상숙제 메모)에 입력 중이면 덮어쓰지 않도록 건너뜁니다
+    if(document.activeElement && document.activeElement.id==='hw-v-note') return;
+    DB = Object.assign(DB, snap.data());
+    refreshCurrentViewData();
+  }, err=> console.error('실시간 동기화 오류', err));
+}
+function refreshCurrentViewData(){
+  if(!currentRole) return; // 아직 로그인 전
+  if(currentView==='homework-writing' && document.getElementById('hw-w-tbody')) drawWritingTable();
+  else if(currentView==='homework-video' && document.getElementById('hw-v-tbody')) drawVideoTable();
+  else if(currentView==='dashboard' && document.getElementById('dash-tbody')) drawDashboardTable();
+  else if(currentView==='overview' && document.getElementById('view-inner')) renderOverview(document.getElementById('view-inner'));
 }
 
 /* ---------------------- 3. 주차 계산 ---------------------- */
@@ -889,7 +967,7 @@ function enterApp(role, teacherName){
   document.getElementById('app').style.display='flex';
   document.getElementById('role-avatar').textContent = ROLES[role].short;
   document.getElementById('role-name-label').textContent = teacherName!==ROLES[role].label ? `${teacherName} · ${ROLES[role].label}` : ROLES[role].label;
-  const dflt = role==='video_teacher' ? 'homework-video' : 'dashboard';
+  const dflt = role==='video_teacher' ? 'homework-video' : (role==='director' ? 'overview' : 'dashboard');
   currentView = dflt;
   renderNav();
   renderView(currentView);
@@ -911,6 +989,7 @@ function logout(){
 }
 
 const NAV_ITEMS = [
+  { key:'overview', label:'경영 대시보드', roles:['director'], icon:`<svg viewBox="0 0 24 24" fill="none"><path d="M3 3v18h18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 15l4-5 3 3 5-7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
   { key:'dashboard', label:'주간 위험군 대시보드', roles:['director'], icon:`<svg viewBox="0 0 24 24" fill="none"><path d="M4 19V10M10 19V5M16 19v-7M22 19H2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>` },
   { key:'students', label:'원생 목록', roles:['director','exam_teacher','video_teacher'], icon:`<svg viewBox="0 0 24 24" fill="none"><path d="M17 20v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1M9 12a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM19 20v-1a3.5 3.5 0 0 0-2.5-3.36M15 4.6A3.5 3.5 0 0 1 15 11.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>` },
   { key:'exam-input', label:'시험 성적 입력', roles:['director','exam_teacher'], icon:`<svg viewBox="0 0 24 24" fill="none"><path d="M12 2 3 7v6c0 5 4 8.5 9 9 5-.5 9-4 9-9V7l-9-5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
@@ -926,15 +1005,23 @@ function renderNav(){
   const nav = document.getElementById('sidebar-nav');
   const items = NAV_ITEMS.filter(n=>n.roles.includes(currentRole));
   nav.innerHTML = `<div class="nav-section-label">메뉴</div>` + items.map(n=>`
-    <a href="javascript:void(0)" class="nav-item ${currentView===n.key?'active':''}" onclick="renderView('${n.key}')">
+    <a href="javascript:void(0)" class="nav-item ${currentView===n.key?'active':''}" onclick="renderView('${n.key}'); closeMobileNav();">
       ${n.icon}<span>${n.label}</span>
     </a>
-  `).join('');
+  `).join('') + `
+    <a href="javascript:void(0)" class="nav-item mobile-only-navitem" onclick="closeMobileNav(); logout();">
+      <svg viewBox="0 0 24 24" fill="none" width="17" height="17"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>역할 변경 / 로그아웃</span>
+    </a>
+  `;
 }
+function toggleMobileNav(){ document.getElementById('sidebar-nav').classList.toggle('mobile-open'); }
+function closeMobileNav(){ document.getElementById('sidebar-nav').classList.remove('mobile-open'); }
 
 /* ---------------------- 7. 화면 라우팅 ---------------------- */
 
 const VIEW_META = {
+  'overview': {eyebrow:'OVERVIEW', title:'경영 대시보드', desc:'재원 현황, 위험군, 유입경로, 반별 분포를 한눈에 확인하세요'},
   'dashboard': {eyebrow:'DASHBOARD', title:'주간 위험군 대시보드', desc:'이번 주 학생 현황을 색상 등급으로 한눈에 확인하세요'},
   'students': {eyebrow:'STUDENTS', title:'원생 목록', desc:'반 배정과 기본 정보를 관리합니다'},
   'exam-input': {eyebrow:'EXAM', title:'시험 성적 입력', desc:'반별로 응시해야 할 시험만 자동으로 표시됩니다'},
@@ -946,19 +1033,10 @@ const VIEW_META = {
   'settings': {eyebrow:'SETTINGS', title:'설정', desc:'위험군 판정 기준과 반별 시험 매칭을 조정합니다'},
 };
 
-let _syncTimer = null;
-function stopLiveSync(){ if(_syncTimer){ clearInterval(_syncTimer); _syncTimer=null; } }
-function startLiveSync(key){
-  stopLiveSync();
-  if(key!=='homework-writing' && key!=='homework-video') return;
-  _syncTimer = setInterval(async ()=>{
-    // 영상숙제 비고란에 입력 중이면 새로고침으로 덮어쓰지 않도록 건너뜁니다
-    if(document.activeElement && document.activeElement.id==='hw-v-note') return;
-    await loadDB();
-    if(key==='homework-writing' && document.getElementById('hw-w-tbody')) drawWritingTable();
-    if(key==='homework-video' && document.getElementById('hw-v-tbody')) drawVideoTable();
-  }, 15000);
-}
+// Firestore onSnapshot 실시간 리스너로 대체되어, 더 이상 15초 폴링이 필요 없습니다.
+// (호출부 호환을 위해 함수는 남겨두되 아무 동작도 하지 않습니다)
+function stopLiveSync(){}
+function startLiveSync(key){}
 
 function renderView(key){
   currentView = key;
@@ -971,7 +1049,8 @@ function renderView(key){
   root.innerHTML = '<div class="view active" id="view-inner"></div>';
   const inner = document.getElementById('view-inner');
 
-  if(key==='dashboard') renderDashboard(inner);
+  if(key==='overview') renderOverview(inner);
+  else if(key==='dashboard') renderDashboard(inner);
   else if(key==='students') renderStudents(inner);
   else if(key==='exam-input') renderExamInput(inner);
   else if(key==='homework-writing') renderHomeworkWriting(inner);
@@ -985,7 +1064,151 @@ function renderView(key){
   window.scrollTo({top:0, behavior:'instant'});
 }
 
-/* ---------------------- 8. 대시보드 ---------------------- */
+/* ---------------------- 7-1. 경영 대시보드 ---------------------- */
+
+function renderOverview(root){
+  const now = new Date();
+  const thisMonth = fmtDate(now).slice(0,7); // 'YYYY-MM'
+  const active = DB.students.filter(s=>(s.status||'재원')==='재원');
+  const totalActive = active.length;
+
+  // 이번 달 신규 / 퇴원
+  const newThisMonth = DB.students.filter(s=> (s.registeredAt||'').slice(0,7)===thisMonth).length;
+  const withdrawnThisMonth = (DB.statusHistory||[]).filter(h=> h.toStatus==='퇴원' && (h.changedAt||'').slice(0,10).slice(0,7)===thisMonth).length;
+
+  // 위험군 / 관찰 필요 (재원생 기준, 이번 주 등급)
+  const wk = currentWeekKey();
+  let riskCount = 0, watchCount = 0;
+  active.forEach(s=>{
+    const g = computeWeeklyGrade(s.id, wk);
+    const w = computeWatchFlag(s.id);
+    if(g.hasAnyRecord && g.grade==='red') riskCount++;
+    if(w.watch) watchCount++;
+  });
+
+  // 반별 인원 분포
+  const classCounts = CLASSES.map(c=>({ c, n: active.filter(s=>s.className===c).length }));
+  const maxClassCount = Math.max(1, ...classCounts.map(x=>x.n));
+
+  // 학교별 분포 (상위 8개)
+  const schoolMap = {};
+  active.forEach(s=>{ const sc = (s.school||'').trim() || '학교 미입력'; schoolMap[sc]=(schoolMap[sc]||0)+1; });
+  const schoolList = Object.entries(schoolMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const maxSchool = Math.max(1, ...schoolList.map(x=>x[1]));
+
+  // 유입경로 분포 (재원생 중 입력된 학생만)
+  const chanMap = {};
+  active.forEach(s=>{ const rs=(s.referralSource||'').trim(); if(rs) chanMap[rs]=(chanMap[rs]||0)+1; });
+  const chanEntered = Object.values(chanMap).reduce((a,b)=>a+b,0);
+  const chanList = Object.entries(chanMap).sort((a,b)=>b[1]-a[1]);
+  const chanUnknown = totalActive - chanEntered;
+  const maxChan = Math.max(1, ...chanList.map(x=>x[1]), chanUnknown);
+
+  // 형제자매 등록 비율
+  let siblingCount = 0;
+  active.forEach(s=>{ if(householdOf(s.id).filter(x=>x.id!==s.id).length) siblingCount++; });
+  const siblingPct = totalActive? Math.round(siblingCount/totalActive*100) : 0;
+
+  // 평균 재원 기간 (재원생 중 등록일이 있는 학생)
+  const withReg = active.filter(s=>s.registeredAt);
+  let avgMonths = null;
+  if(withReg.length){
+    const total = withReg.reduce((sum,s)=>{
+      const reg = new Date(s.registeredAt);
+      const m = (now.getFullYear()-reg.getFullYear())*12 + (now.getMonth()-reg.getMonth());
+      return sum + Math.max(0,m);
+    },0);
+    avgMonths = Math.round((total/withReg.length)*10)/10;
+  }
+
+  // 최근 퇴원 학생 (최대 6건)
+  const withdrawals = (DB.statusHistory||[]).filter(h=>h.toStatus==='퇴원')
+    .sort((a,b)=> (b.changedAt||'').localeCompare(a.changedAt||'')).slice(0,6)
+    .map(h=>({ h, s: studentById(h.studentId) }));
+
+  root.innerHTML = `
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-bar ink"></div><div class="stat-label">재원생 수</div><div class="stat-num">${totalActive}</div><div class="stat-sub">전체 등록 ${DB.students.length}명 중</div></div>
+      <div class="stat-card"><div class="stat-bar green"></div><div class="stat-label">이번 달 신규</div><div class="stat-num">+${newThisMonth}</div><div class="stat-sub">${thisMonth} 등록 기준</div></div>
+      <div class="stat-card"><div class="stat-bar red"></div><div class="stat-label">이번 달 퇴원</div><div class="stat-num">-${withdrawnThisMonth}</div><div class="stat-sub">${thisMonth} 퇴원 처리 기준</div></div>
+      <div class="stat-card"><div class="stat-bar watch"></div><div class="stat-label">위험군 · 관찰 필요</div><div class="stat-num">${riskCount} / ${watchCount}</div><div class="stat-sub">위험(빨강) / 관찰 필요 · <a href="javascript:void(0)" onclick="renderView('dashboard')" style="color:var(--brass); font-weight:700;">주간 대시보드 →</a></div></div>
+    </div>
+
+    <div class="kpi-row2">
+      <div class="mini-stat"><div class="lbl">형제·자매 등록 비율</div><div class="val">${siblingPct}%</div><div class="sub">재원생 ${totalActive}명 중 ${siblingCount}명이 형제·자매 함께 등록</div></div>
+      <div class="mini-stat"><div class="lbl">평균 재원 기간</div><div class="val">${avgMonths===null? '-' : avgMonths+'개월'}</div><div class="sub">${withReg.length? `등록일이 입력된 재원생 ${withReg.length}명 기준` : '등록일이 입력된 학생이 없어요'}</div></div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header"><div><h3>반별 인원 분포</h3><div class="hint">재원생 기준</div></div></div>
+      <div class="card-pad">
+        ${classCounts.filter(x=>x.n>0 || true).map(({c,n})=>`
+          <div class="hbar-row">
+            <div class="hbar-label">${c}반</div>
+            <div class="hbar-track"><div class="hbar-fill" style="width:${n/maxClassCount*100}%"></div></div>
+            <div class="hbar-num">${n}명</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header"><div><h3>학교별 분포</h3><div class="hint">재원생이 많은 학교 상위 ${schoolList.length}곳</div></div></div>
+      <div class="card-pad">
+        ${schoolList.length? schoolList.map(([sc,n])=>`
+          <div class="hbar-row">
+            <div class="hbar-label" title="${esc(sc)}">${esc(sc)}</div>
+            <div class="hbar-track"><div class="hbar-fill ink" style="width:${n/maxSchool*100}%"></div></div>
+            <div class="hbar-num">${n}명</div>
+          </div>
+        `).join('') : `<div class="empty-state">학교 정보가 입력된 학생이 없어요</div>`}
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header"><div><h3>유입경로별 신규 등록 분포</h3><div class="hint">원생 목록의 "유입경로" 항목 기준 · 채널별 조회수와 비교하면 전환율을 계산할 수 있어요</div></div></div>
+      <div class="card-pad">
+        ${chanList.length? chanList.map(([ch,n])=>`
+          <div class="hbar-row">
+            <div class="hbar-label" title="${esc(ch)}">${esc(ch)}</div>
+            <div class="hbar-track"><div class="hbar-fill" style="width:${n/maxChan*100}%"></div></div>
+            <div class="hbar-num">${n}명</div>
+          </div>
+        `).join('') : ''}
+        ${chanUnknown>0? `
+          <div class="hbar-row">
+            <div class="hbar-label muted">경로 미입력</div>
+            <div class="hbar-track"><div class="hbar-fill" style="width:${chanUnknown/maxChan*100}%; background:#c9c3b3;"></div></div>
+            <div class="hbar-num muted">${chanUnknown}명</div>
+          </div>` : ''}
+        ${(!chanList.length && !chanUnknown)? `<div class="empty-state">재원생이 없어요</div>` : ''}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div><h3>최근 퇴원 학생</h3><div class="hint">최근 6건 · 사유는 상태 변경 시 남긴 메모예요</div></div></div>
+      <div class="card-pad">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>퇴원일</th><th>이름</th><th>반</th><th>사유</th></tr></thead>
+            <tbody>
+              ${withdrawals.length? withdrawals.map(({h,s})=>`
+                <tr>
+                  <td class="mono">${esc((h.changedAt||'').slice(0,10))}</td>
+                  <td>${s? esc(s.name) : '(삭제된 학생)'}</td>
+                  <td>${s? `<span class="badge badge-class">${s.className}반</span>` : ''}</td>
+                  <td class="muted">${esc(h.note||'-')}</td>
+                </tr>
+              `).join('') : `<tr><td colspan="4"><div class="empty-state">최근 퇴원 기록이 없어요</div></td></tr>`}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ---------------------- 8. 대시보드 (주간 위험군) ---------------------- */
 
 function renderDashboard(root){
   const wk = currentWeekKey();
@@ -1080,7 +1303,7 @@ function drawDashboardTable(){
       <td><div class="seal ${gradeSealClass(gr)}">${gradeSealChar(gr)}</div></td>
       <td><a href="javascript:void(0)" onclick="openStudentDetail('${s.id}')" style="font-weight:700; color:var(--text-strong); text-decoration:none;">${esc(s.name)}</a> ${s.notes? `<span title="${esc(s.notes)}" style="cursor:help;">📌</span>`:''}</td>
       <td><span class="badge badge-class">${s.className}반</span></td>
-      <td class="muted">${esc(s.school||'학교 미입력')} · ${s.grade}학년</td>
+      <td class="muted">${esc(s.school||'학교 미입력')} · ${esc(s.grade||'-')}</td>
       <td class="muted" style="max-width:280px;">${g.hasAnyRecord ? (g.detail.length? esc(g.detail.slice(0,2).join(', ')) + (g.detail.length>2? ` 외 ${g.detail.length-2}건`:'') : '이슈 없음') : '이번 주 입력 기록 없음'}</td>
       <td>${w.watch? `<span class="pill pill-watch" title="최근 ${w.windowWeeks}주 중 ${w.badCount}주 노랑·빨강">관찰 필요</span>` : ''}</td>
       <td><button class="btn btn-ghost btn-sm no-print" onclick="openStudentDetail('${s.id}')">상세</button></td>
@@ -1104,7 +1327,7 @@ function openStudentDetail(id){
   openModal(`
     <div class="modal-head">
       <div class="flex gap-10"><div class="seal seal-lg ${gradeSealClass(g.hasAnyRecord?g.grade:'none')}">${gradeSealChar(g.hasAnyRecord?g.grade:'none')}</div>
-        <div><h3>${esc(s.name)}</h3><div class="muted" style="font-size:12.5px;">${s.className}반 · ${esc(s.school||'학교 미입력')} ${s.grade}학년</div></div>
+        <div><h3>${esc(s.name)}</h3><div class="muted" style="font-size:12.5px;">${s.className}반 · ${esc(s.school||'학교 미입력')} ${esc(s.grade||'-')}</div></div>
       </div>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
@@ -1125,6 +1348,9 @@ function openStudentDetail(id){
       <div class="flex gap-10 wrap">
         <div class="pill pill-mute">학부모 연락처 ${esc(s.parentPhone||'-')}</div>
         <div class="pill pill-mute">등록일 ${esc(s.registeredAt||'-')}</div>
+        ${s.attendanceNo? `<div class="pill pill-mute">출결번호 ${esc(s.attendanceNo)}</div>` : ''}
+        ${s.address? `<div class="pill pill-mute">거주지 ${esc(s.address)}</div>` : ''}
+        ${s.referralSource? `<div class="pill pill-mute">유입경로 ${esc(s.referralSource)}</div>` : ''}
         ${DB.classHistory.filter(h=>h.studentId===id).length? `<button class="pill pill-mute" style="cursor:pointer; border:none;" onclick="closeModal(); openClassHistory('${id}')">반 이동 ${DB.classHistory.filter(h=>h.studentId===id).length}회 보기</button>` : ''}
         ${(()=>{ const hh=householdOf(id).filter(x=>x.id!==id); return hh.length? `<div class="pill pill-watch">형제·자매: ${esc(hh.map(h=>h.name+'('+h.className+'반)').join(', '))}</div>` : ''; })()}
       </div>
@@ -1143,7 +1369,7 @@ function renderStudents(root){
   root.innerHTML = `
     <div class="card">
       <div class="card-header">
-        <div><h3>원생 목록</h3><div class="hint">재원 ${activeCount}명 · 전체 ${DB.students.length}명 · A~M반</div></div>
+        <div><h3>원생 목록</h3><div class="hint">재원 ${activeCount}명 · 전체 ${DB.students.length}명 · ${CLASSES[0]}~${CLASSES[CLASSES.length-1]}반</div></div>
         ${canEdit? `<button class="btn btn-brass" onclick="openStudentForm()">
           <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
           원생 등록</button>` : ''}
@@ -1198,7 +1424,7 @@ function filterStudentsTable(){
       <td><span class="pill ${meta.pill}" style="cursor:${canEdit?'pointer':'default'};" ${canEdit?`onclick="openStatusChange('${s.id}')" title="클릭해서 상태 변경"`:''}>${status}</span></td>
       <td><span class="badge badge-class">${s.className}반</span> ${historyCount? `<button class="btn btn-ghost btn-sm" style="padding:2px 8px; margin-left:4px;" title="반 이동 이력 보기" onclick="openClassHistory('${s.id}')">이동${historyCount}회</button>`:''}</td>
       <td class="muted">${esc(s.school||'-')}</td>
-      <td class="muted">${s.grade}학년</td>
+      <td class="muted">${esc(s.grade||'-')}</td>
       <td class="muted">${esc(s.parentPhone||'-')} ${household.length? `<span class="pill pill-watch" style="margin-left:4px; cursor:help;" title="형제·자매: ${esc(household.map(h=>h.name+'('+h.className+'반)').join(', '))}">형제 ${household.length}</span>`:''}</td>
       <td class="muted">${esc(s.registeredAt||'-')}</td>
       <td class="muted" style="font-size:12px;">${CLASS_EXAMS[s.className].map(e=>EXAM_META[e].name).join(', ')}</td>
@@ -1228,10 +1454,15 @@ function openStudentForm(id){
       </div>` : ''}
       <div class="field-row">
         <div class="field"><label>학교</label><input id="f-school" value="${s?esc(s.school):''}"></div>
-        <div class="field"><label>학년</label><input id="f-grade" type="number" min="1" max="6" value="${s?s.grade:''}"></div>
+        <div class="field"><label>학년</label><input id="f-grade" placeholder="예: 초2, 중3, 고1" value="${s?esc(s.grade):''}"></div>
       </div>
+      <div class="field"><label>출결번호 <span class="muted" style="font-weight:400;">(결제선생·출결선생 등 다른 시스템의 학생 번호)</span></label><input id="f-attnum" placeholder="예: 7782" value="${s?esc(s.attendanceNo||''):''}"></div>
       <div class="field"><label>학부모 연락처</label><input id="f-phone" placeholder="010-0000-0000" value="${s?esc(s.parentPhone):''}"></div>
-      <div class="field"><label>등록일</label><input id="f-reg" type="date" value="${s?s.registeredAt:fmtDate(new Date())}"></div>
+      <div class="field-row">
+        <div class="field"><label>등록일</label><input id="f-reg" type="date" value="${s?s.registeredAt:fmtDate(new Date())}"></div>
+        <div class="field"><label>유입경로 (추천인)</label><input id="f-referral" placeholder="예: 네이버플레이스, 인스타그램, OOO 학부모 추천" value="${s?esc(s.referralSource||''):''}"></div>
+      </div>
+      <div class="field"><label>거주지 주소</label><input id="f-address" placeholder="예: 주안뉴타운1단지 101동" value="${s?esc(s.address||''):''}"></div>
       <div class="field">
         <label>특이사항 (지속 메모)</label>
         <textarea id="f-notes" rows="3" placeholder="예: 손이 느려서 시간을 더 줘야 함 / 땅콩 알레르기 있음 / 형이 D반 다님">${s?esc(s.notes||''):''}</textarea>
@@ -1255,18 +1486,18 @@ function openStudentForm(id){
 async function saveStudent(id){
   const name = document.getElementById('f-name').value.trim();
   if(!name){ toast('이름을 입력해주세요', true); return; }
-  const gradeVal = Number(document.getElementById('f-grade').value);
-  if(document.getElementById('f-grade').value!=='' && (isNaN(gradeVal) || gradeVal<1 || gradeVal>6)){
-    toast('학년은 1~6 사이로 입력해주세요', true); return;
-  }
+  const gradeVal = document.getElementById('f-grade').value.trim();
   const newClass = document.getElementById('f-class').value;
   const data = {
     name,
     className: newClass,
     school: document.getElementById('f-school').value.trim(),
-    grade: gradeVal||0,
+    grade: gradeVal,
     parentPhone: document.getElementById('f-phone').value.trim(),
+    attendanceNo: document.getElementById('f-attnum').value.trim(),
     registeredAt: document.getElementById('f-reg').value,
+    referralSource: document.getElementById('f-referral').value.trim(),
+    address: document.getElementById('f-address').value.trim(),
     notes: document.getElementById('f-notes').value.trim(),
   };
   let classChangedMsg = null;
@@ -1698,7 +1929,7 @@ function renderHomeworkVideo(root){
   root.innerHTML = `
     <div class="card" style="margin-bottom:16px;">
       <div class="card-header">
-        <div><h3>영상숙제 체크</h3><div class="hint">ERC · 단어 · 알파 · 독서감상 · 일기 5종 상태를 기록합니다</div></div>
+        <div><h3>영상숙제 체크</h3><div class="hint">한 화면에서 ERC · 단어 · 알파 · 독서감상 · 일기를 모두 체크하세요 — 챕터별로 화면을 옮길 필요 없이, 학생 줄에서 바로 클릭하면 됩니다</div></div>
         <input type="date" id="hw-v-date" value="${fmtDate(new Date())}" onchange="drawVideoTable()" style="padding:8px 12px; border-radius:9px; border:1px solid var(--paper-line);">
       </div>
       <div class="card-pad">
@@ -1708,21 +1939,22 @@ function renderHomeworkVideo(root){
             <option value="">전체 반</option>
             ${videoClasses.map(c=>`<option value="${c}">${c}반${CLASS_TIME[c]?` (${CLASS_TIME[c]})`:''}</option>`).join('')}
           </select>
-          <select id="hw-v-type" onchange="drawVideoTable()" style="padding:8px 12px; border-radius:9px; border:1px solid var(--paper-line); font-size:13px;">
-            ${VIDEO_TYPES.map(v=>`<option value="${v.key}">${v.name} 영상</option>`).join('')}
-          </select>
           <label class="chip-filter" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
-            <input type="checkbox" id="hw-v-onlyunchecked" onchange="drawVideoTable()" style="margin:0;"> 미체크만 보기
+            <input type="checkbox" id="hw-v-onlyunchecked" onchange="drawVideoTable()" style="margin:0;"> 미체크 남은 학생만 보기
           </label>
-          <button class="btn btn-ghost btn-sm" onclick="bulkMarkVideo()" title="미체크 학생을 한 번에 '정상제출'로 처리합니다">
+          <button class="btn btn-ghost btn-sm" onclick="bulkMarkVideo()" title="5개 챕터 중 아직 체크 안 된 항목을 한 번에 '정상제출'로 처리합니다">
             <svg viewBox="0 0 24 24" fill="none" width="14" height="14"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             미체크 전체 정상제출 처리</button>
           <div style="flex:1"></div>
           <div id="hw-v-counter"></div>
         </div>
         <div class="table-wrap">
-          <table><thead><tr><th>이름</th><th>반</th><th>상태</th><th>마지막 체크</th></tr></thead><tbody id="hw-v-tbody"></tbody></table>
+          <table><thead>
+            <tr><th rowspan="2">이름</th><th rowspan="2">반</th><th colspan="${VIDEO_TYPES.length}" style="text-align:center;">챕터 (눌러서 바로 체크)</th></tr>
+            <tr id="hw-v-thead-chapters"></tr>
+          </thead><tbody id="hw-v-tbody"></tbody></table>
         </div>
+        <div class="muted" style="font-size:11px; margin-top:10px;">※ 셀을 눌러 상태를 바로 선택하세요. "미체크"를 다시 선택하면 체크를 취소할 수 있어요.</div>
       </div>
     </div>
     <div class="card" id="hw-v-notecard">
@@ -1736,10 +1968,16 @@ function renderHomeworkVideo(root){
   drawVideoTable();
 }
 
+function videoSelectClass(status){
+  if(!status) return 'vsel-none';
+  if(status==='정상제출') return 'vsel-ok';
+  if(status==='현장보완') return 'vsel-warn';
+  return 'vsel-bad';
+}
+
 function drawVideoTable(){
   const date = document.getElementById('hw-v-date').value;
   const cls = document.getElementById('hw-v-class').value;
-  const type = document.getElementById('hw-v-type').value;
   const onlyUnchecked = document.getElementById('hw-v-onlyunchecked').checked;
   let students = DB.students.filter(s=> (!cls || s.className===cls) && ((s.status||'재원')==='재원')).sort((a,b)=>a.className.localeCompare(b.className)||a.name.localeCompare(b.name));
 
@@ -1749,38 +1987,49 @@ function drawVideoTable(){
     ? `<div class="pill pill-mute" style="display:block; padding:10px 14px; margin-bottom:14px; font-size:13px;">📅 오늘은 휴무일이에요 — ${esc(holiday.label||'사유 없음')} · <button class="btn btn-ghost btn-sm" style="padding:2px 8px;" onclick="removeHoliday('${date}'); drawVideoTable();">휴무일 해제</button></div>`
     : `<div class="no-print" style="margin-bottom:14px;"><button class="btn btn-ghost btn-sm" onclick="quickAddHoliday('${date}', drawVideoTable)">📅 이 날을 휴무일로 등록</button></div>`;
 
-  const typeName = (VIDEO_TYPES.find(v=>v.key===type)||{}).name || '';
+  // 챕터별 헤더 (미체크 인원 표시)
+  const theadEl = document.getElementById('hw-v-thead-chapters');
+  theadEl.innerHTML = VIDEO_TYPES.map(v=>{
+    const unchecked = students.filter(s=> !DB.homeworkRecords.find(r=>r.studentId===s.id && r.type===v.key && r.date===date)).length;
+    return `<th style="text-align:center;"><div class="video-chapter-head"><span>${v.name}</span><span class="cnt ${unchecked===0 && students.length>0?'done':''}">${students.length===0?'':(unchecked===0?'완료':unchecked+'명 미체크')}</span></div></th>`;
+  }).join('');
+
+  const recordOf = (studentId, type)=> DB.homeworkRecords.find(r=>r.studentId===studentId && r.type===type && r.date===date);
+  const missingCountFor = (s)=> VIDEO_TYPES.filter(v=>!recordOf(s.id, v.key)).length;
+
   const counterEl = document.getElementById('hw-v-counter');
   if(holiday){
     counterEl.innerHTML = `<span class="pill pill-mute">휴무일 · 체크 불필요</span>`;
   } else {
-    const uncheckedCount = students.filter(s=> !DB.homeworkRecords.find(r=>r.studentId===s.id && r.type===type && r.date===date)).length;
-    counterEl.innerHTML = students.length===0 ? '' : (uncheckedCount>0
-      ? `<span class="pill pill-warn">${typeName} 미체크 ${uncheckedCount}명</span>`
-      : `<span class="pill pill-ok">${typeName} 전원 체크 완료</span>`);
+    const studentsWithMissing = students.filter(s=>missingCountFor(s)>0).length;
+    counterEl.innerHTML = students.length===0 ? '' : (studentsWithMissing>0
+      ? `<span class="pill pill-warn">미체크 항목 남은 학생 ${studentsWithMissing}명</span>`
+      : `<span class="pill pill-ok">전원 5개 챕터 체크 완료</span>`);
   }
 
   if(onlyUnchecked){
-    students = students.filter(s=> !DB.homeworkRecords.find(r=>r.studentId===s.id && r.type===type && r.date===date));
+    students = students.filter(s=>missingCountFor(s)>0);
   }
 
   const tbody = document.getElementById('hw-v-tbody');
   tbody.innerHTML = students.map(s=>{
-    const rec = DB.homeworkRecords.find(r=>r.studentId===s.id && r.type===type && r.date===date);
-    const cur = rec ? rec.status : null;
-    const recent = rec && isRecent(rec.updatedAt, 10);
-    return `<tr ${!rec?'style="background:#fbf7ec;"':''}>
-      <td style="font-weight:700;">${esc(s.name)} ${s.notes?`<span title="${esc(s.notes)}" style="cursor:help;">📌</span>`:''} ${!rec?'<span class="pill pill-mute" style="margin-left:6px;">미체크</span>':''}</td>
+    const missing = missingCountFor(s);
+    return `<tr ${missing>0?'style="background:#fbf7ec;"':''}>
+      <td style="font-weight:700; white-space:nowrap;">${esc(s.name)} ${s.notes?`<span title="${esc(s.notes)}" style="cursor:help;">📌</span>`:''} ${missing>0?`<span class="pill pill-mute" style="margin-left:6px;">미체크 ${missing}</span>`:''}</td>
       <td><span class="badge badge-class">${s.className}반</span></td>
-      <td><div class="status-btns">
-        ${VIDEO_STATUS.map(st=>{
-          const cls2 = st==='정상제출'?'sel-ok':(st==='현장보완'?'sel-warn':'sel-bad');
-          return `<button class="status-btn ${cur===st?cls2:''}" onclick="setVideoStatus('${s.id}','${date}','${type}','${st}')">${st}</button>`;
-        }).join('')}
-      </div></td>
-      <td class="muted" style="font-size:11.5px; white-space:nowrap;">${rec? `${recent?'<span style=\"color:var(--brass); font-weight:700;\">● </span>':''}${esc(rec.teacher||'')} · ${relativeTime(rec.updatedAt)}` : ''}</td>
+      ${VIDEO_TYPES.map(v=>{
+        const rec = recordOf(s.id, v.key);
+        const cur = rec ? rec.status : '';
+        const title = rec ? `${esc(rec.teacher||'')} · ${relativeTime(rec.updatedAt)}` : '아직 체크 안 함';
+        return `<td class="vsel-cell">
+          <select class="vsel ${videoSelectClass(cur)}" title="${title}" onchange="setVideoStatus('${s.id}','${date}','${v.key}',this.value)">
+            <option value="" ${!cur?'selected':''}>미체크</option>
+            ${VIDEO_STATUS.map(st=>`<option value="${st}" ${cur===st?'selected':''}>${st}</option>`).join('')}
+          </select>
+        </td>`;
+      }).join('')}
     </tr>`;
-  }).join('') || `<tr><td colspan="4"><div class="empty-state">${onlyUnchecked? '미체크 학생이 없어요 🎉':'학생이 없어요'}</div></td></tr>`;
+  }).join('') || `<tr><td colspan="${2+VIDEO_TYPES.length}"><div class="empty-state">${onlyUnchecked? '미체크 학생이 없어요 🎉':'학생이 없어요'}</div></td></tr>`;
 
   // 비고는 반 단위로 남기는 메모라, 반을 선택했을 때만 활성화됩니다
   const weekKey = getWeekKey(date);
@@ -1801,10 +2050,15 @@ function drawVideoTable(){
 }
 
 async function setVideoStatus(studentId, date, type, status){
-  let rec = DB.homeworkRecords.find(r=>r.studentId===studentId && r.type===type && r.date===date);
-  const now = new Date().toISOString();
-  if(rec){ rec.status = status; rec.teacher = currentTeacherLabel(); rec.updatedAt = now; }
-  else { DB.homeworkRecords.push({ id:uid('hw'), studentId, type, date, status, teacher: currentTeacherLabel(), updatedAt: now }); }
+  if(!status){
+    // "미체크"를 다시 선택하면 체크를 취소합니다
+    DB.homeworkRecords = DB.homeworkRecords.filter(r=> !(r.studentId===studentId && r.type===type && r.date===date));
+  } else {
+    let rec = DB.homeworkRecords.find(r=>r.studentId===studentId && r.type===type && r.date===date);
+    const now = new Date().toISOString();
+    if(rec){ rec.status = status; rec.teacher = currentTeacherLabel(); rec.updatedAt = now; }
+    else { DB.homeworkRecords.push({ id:uid('hw'), studentId, type, date, status, teacher: currentTeacherLabel(), updatedAt: now }); }
+  }
   const ok = await saveDB();
   drawVideoTable();
   if(ok) toast('저장했어요');
@@ -1813,18 +2067,24 @@ async function setVideoStatus(studentId, date, type, status){
 async function bulkMarkVideo(){
   const date = document.getElementById('hw-v-date').value;
   const cls = document.getElementById('hw-v-class').value;
-  const type = document.getElementById('hw-v-type').value;
   const students = DB.students.filter(s=> (!cls || s.className===cls) && ((s.status||'재원')==='재원'));
-  const targets = students.filter(s=> !DB.homeworkRecords.find(r=>r.studentId===s.id && r.type===type && r.date===date));
-  if(targets.length===0){ toast('이미 전원 체크되어 있어요'); return; }
-  const typeName = (VIDEO_TYPES.find(v=>v.key===type)||{}).name || '';
-  if(!confirm(`${cls?cls+'반 ':'전체 반 '}${typeName} 영상 미체크 학생 ${targets.length}명을 모두 '정상제출'로 처리할까요?\n이미 체크된 학생은 그대로 유지됩니다.`)) return;
-  targets.forEach(s=>{
-    DB.homeworkRecords.push({ id:uid('hw'), studentId:s.id, type, date, status:'정상제출', teacher: currentTeacherLabel(), updatedAt: new Date().toISOString() });
+  const targets = [];
+  students.forEach(s=>{
+    VIDEO_TYPES.forEach(v=>{
+      if(!DB.homeworkRecords.find(r=>r.studentId===s.id && r.type===v.key && r.date===date)){
+        targets.push({studentId:s.id, type:v.key});
+      }
+    });
+  });
+  if(targets.length===0){ toast('이미 전원 5개 챕터가 체크되어 있어요'); return; }
+  if(!confirm(`${cls?cls+'반 ':'전체 반 '}미체크 챕터 ${targets.length}건(학생×챕터)을 모두 '정상제출'로 처리할까요?\n이미 체크된 항목은 그대로 유지됩니다.`)) return;
+  const now = new Date().toISOString();
+  targets.forEach(t=>{
+    DB.homeworkRecords.push({ id:uid('hw'), studentId:t.studentId, type:t.type, date, status:'정상제출', teacher: currentTeacherLabel(), updatedAt: now });
   });
   const ok = await saveDB();
   drawVideoTable();
-  if(ok) toast(`${targets.length}명을 정상제출로 일괄 처리했어요`);
+  if(ok) toast(`${targets.length}건을 정상제출로 일괄 처리했어요`);
 }
 
 async function saveVideoNote(){
@@ -2075,7 +2335,7 @@ function drawReport(){
     return `
     <div class="card" style="margin-bottom:16px;">
       <div class="card-header">
-        <div><h3>${esc(s.name)} <span class="muted" style="font-weight:400; font-size:13px;">· ${s.className}반 · ${esc(s.school||'학교 미입력')} ${s.grade}학년</span></h3><div class="hint">${mk} 월간 리포트</div></div>
+        <div><h3>${esc(s.name)} <span class="muted" style="font-weight:400; font-size:13px;">· ${s.className}반 · ${esc(s.school||'학교 미입력')} ${esc(s.grade||'-')}</span></h3><div class="hint">${mk} 월간 리포트</div></div>
         <div class="seal-row">${sum.trend.map(t=>`<div class="seal seal-sm ${gradeSealClass(t.hasAnyRecord?t.grade:'none')}" title="${t.weekKey}"></div>`).join('')}</div>
       </div>
       <div class="card-pad">
@@ -2391,6 +2651,22 @@ function renderSettings(root){
 
     <div class="card" style="margin-bottom:20px;">
       <div class="card-header">
+        <div><h3>엑셀 경영 대시보드용 데이터 내보내기</h3><div class="hint">엑셀 대시보드 템플릿의 "학생데이터" 시트에 그대로 붙여넣을 수 있는 CSV예요</div></div>
+      </div>
+      <div class="card-pad">
+        <button class="btn btn-brass" onclick="exportExcelCSV()">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 4h11l5 5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 13l2 2 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          엑셀용 데이터 내보내기 (.csv)</button>
+        <div class="muted" style="font-size:12px; margin-top:12px; line-height:1.6;">
+          · 이름·반·상태·학교·학년·등록일·퇴원일·유입경로·형제자매여부·이번 주 위험등급·관찰필요여부, 총 11개 열이 그대로 나와요.<br>
+          · 다운로드한 CSV를 열어 전체 선택 후 복사 → 엑셀 대시보드의 <b>"학생데이터"</b> 시트 A3칸에 붙여넣으면 대시보드 숫자와 차트가 자동으로 갱신돼요.<br>
+          · 위험등급·관찰필요는 오늘(이번 주) 기준으로 계산돼서 내보낼 때마다 최신 값이 반영돼요.
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header">
         <div><h3>데이터 백업</h3><div class="hint">브라우저 저장소는 캐시 삭제나 기기 변경 시 사라질 수 있어요. 정기적으로 백업해두세요.</div></div>
       </div>
       <div class="card-pad">
@@ -2473,6 +2749,45 @@ function renderSettings(root){
     </div>
   `;
 }
+function exportExcelCSV(){
+  const wk = currentWeekKey();
+  const GRADE_LABEL = {green:'정상', yellow:'주의', red:'위험'};
+  const rows = [["이름","반","상태","학교","학년","등록일","퇴원일","유입경로","형제자매(Y/N)","위험등급","관찰필요(Y/N)"]];
+  DB.students.forEach(s=>{
+    const status = s.status || '재원';
+    let withdrawnAt = '';
+    if(status==='퇴원'){
+      const hist = (DB.statusHistory||[]).filter(h=>h.studentId===s.id && h.toStatus==='퇴원').sort((a,b)=>(b.changedAt||'').localeCompare(a.changedAt||''));
+      if(hist.length) withdrawnAt = (hist[0].changedAt||'').slice(0,10);
+    }
+    const hasSibling = householdOf(s.id).filter(x=>x.id!==s.id).length>0 ? 'Y' : 'N';
+    let riskLabel = '기록없음';
+    if(status==='재원'){
+      const g = computeWeeklyGrade(s.id, wk);
+      riskLabel = g.hasAnyRecord ? (GRADE_LABEL[g.grade]||'기록없음') : '기록없음';
+    }
+    const watchYN = status==='재원' && computeWatchFlag(s.id).watch ? 'Y' : 'N';
+    rows.push([
+      s.name, s.className, status, s.school||'', s.grade||'',
+      s.registeredAt||'', withdrawnAt, s.referralSource||'', hasSibling, riskLabel, watchYN
+    ]);
+  });
+  const csv = rows.map(r=> r.map(v=>{
+    const str = String(v===undefined||v===null? '' : v);
+    return /[",\n]/.test(str) ? '"'+str.replace(/"/g,'""')+'"' : str;
+  }).join(',')).join('\r\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `남쌤ERC_엑셀용데이터_${fmtDate(new Date())}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  toast('엑셀용 CSV를 다운로드했어요');
+}
+
 function downloadBackup(){
   const payload = {
     _meta: { app:'남쌤 ERC 학원 시험·숙제 체크', exportedAt: new Date().toISOString(), version: STORAGE_KEY },
@@ -2572,6 +2887,7 @@ async function init(){
   } else {
     DB.settings.videoClasses = CLASS_HAS_VIDEO.slice();
   }
+  startRealtimeSync();
 }
 init();
 </script>
