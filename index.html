@@ -1,0 +1,3894 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>남쌤 ERC 학원 · 시험·숙제 체크</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#10161d;
+    --ink-2:#1a222c;
+    --ink-3:#232d38;
+    --ink-line: rgba(255,255,255,0.08);
+    --paper:#f6f4ee;
+    --paper-2:#eeebe1;
+    --paper-line: rgba(16,22,29,0.10);
+    --card:#ffffff;
+    --text-strong:#1c1f23;
+    --text:#3c4249;
+    --text-soft:#767c85;
+    --brass:#9c7a3c;
+    --brass-light:#c9a86a;
+    --brass-dim: rgba(156,122,60,0.14);
+    --green:#4c7a5e;
+    --green-bg:#e7efe9;
+    --amber:#c07f22;
+    --amber-bg:#faf0dd;
+    --red:#a23b3b;
+    --red-bg:#f7e6e4;
+    --watch:#6d5892;
+    --watch-bg:#ece7f2;
+    --shadow-1: 0 1px 2px rgba(16,22,29,0.06), 0 8px 24px -12px rgba(16,22,29,0.18);
+    --shadow-2: 0 20px 60px -20px rgba(16,22,29,0.35);
+    --radius: 14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Noto Sans KR', sans-serif;
+    background:var(--paper);
+    color:var(--text);
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .serif{ font-family:'Noto Serif KR', serif; }
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+  ::selection{ background: var(--brass-dim); }
+
+  a{color:inherit;}
+  button{ font-family:inherit; cursor:pointer; }
+  input, select, textarea{ font-family:inherit; }
+
+  /* ---------- App shell ---------- */
+  #app{ display:flex; min-height:100vh; }
+
+  .sidebar{
+    width:250px; flex-shrink:0;
+    background: var(--ink);
+    color:#eef0f2;
+    display:flex; flex-direction:column;
+    position:sticky; top:0; height:100vh;
+    z-index: 20;
+  }
+  .sidebar-brand{
+    padding:26px 22px 20px;
+    border-bottom:1px solid var(--ink-line);
+    display:flex; align-items:center; gap:12px;
+  }
+  .brand-mark{
+    width:40px; height:40px; border-radius:50%;
+    border:1.5px solid var(--brass-light);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Noto Serif KR', serif; font-weight:700; font-size:16px;
+    color:var(--brass-light);
+    flex-shrink:0;
+    position:relative;
+  }
+  .brand-mark::after{
+    content:''; position:absolute; inset:4px; border-radius:50%;
+    border:1px solid rgba(201,168,106,0.35);
+  }
+  .brand-text .title{ font-family:'Noto Serif KR', serif; font-size:15.5px; font-weight:600; letter-spacing:.2px; color:#f4f1e9; line-height:1.3;}
+  .brand-text .sub{ font-size:11px; color:#98a0aa; letter-spacing:.4px; margin-top:2px;}
+
+  .sidebar-nav{ padding:18px 12px; flex:1; overflow-y:auto; }
+  .nav-section-label{
+    font-size:10.5px; color:#6d7580; letter-spacing:1.2px; text-transform:uppercase;
+    padding:14px 12px 8px;
+  }
+  .nav-item{
+    display:flex; align-items:center; gap:11px;
+    padding:10px 12px; border-radius:10px;
+    color:#c4cad1; font-size:14px; font-weight:500;
+    text-decoration:none; margin-bottom:2px;
+    border:1px solid transparent;
+    transition: background .15s ease, color .15s ease;
+  }
+  .nav-item svg{ width:17px; height:17px; opacity:.85; flex-shrink:0; }
+  .nav-item:hover{ background: var(--ink-2); color:#fff; }
+  .nav-item.active{
+    background: linear-gradient(180deg, rgba(201,168,106,0.16), rgba(201,168,106,0.06));
+    color:#f4e9d4; border-color: rgba(201,168,106,0.30);
+  }
+  .nav-item.active svg{ opacity:1; }
+
+  .sidebar-footer{ padding:16px; border-top:1px solid var(--ink-line); }
+  .role-card{
+    background:var(--ink-2); border:1px solid var(--ink-line);
+    border-radius:12px; padding:12px 14px; display:flex; align-items:center; gap:10px;
+    cursor:pointer;
+  }
+  .role-avatar{
+    width:34px; height:34px; border-radius:50%; flex-shrink:0;
+    background: var(--brass-dim); color:var(--brass-light);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Noto Serif KR', serif; font-weight:700; font-size:14px;
+  }
+  .role-name{ font-size:13px; font-weight:600; color:#f0ede4; }
+  .role-switch{ font-size:11px; color:#8a919b; margin-top:1px;}
+
+  /* ---------- Main ---------- */
+  .main{ flex:1; min-width:0; display:flex; flex-direction:column; }
+  .topbar{
+    position:sticky; top:0; z-index:10;
+    background: rgba(246,244,238,0.88); backdrop-filter: blur(8px);
+    border-bottom:1px solid var(--paper-line);
+    padding:20px 36px; display:flex; align-items:flex-end; justify-content:space-between; gap:20px;
+  }
+  .topbar .eyebrow{ font-size:12px; color:var(--brass); letter-spacing:1px; font-weight:700; margin-bottom:6px; }
+  .topbar h1{ font-family:'Noto Serif KR', serif; font-size:25px; font-weight:700; color:var(--text-strong); margin:0; letter-spacing:-.2px;}
+  .topbar .desc{ font-size:13px; color:var(--text-soft); margin-top:6px; }
+  .topbar-right{ display:flex; align-items:center; gap:10px; flex-shrink:0; }
+  .today-chip{
+    font-size:12.5px; color:var(--text-soft); background:var(--card); border:1px solid var(--paper-line);
+    padding:8px 14px; border-radius:999px; display:flex; align-items:center; gap:7px;
+  }
+
+  .content{ padding:28px 36px 60px; max-width:1320px; width:100%; margin:0 auto; }
+  .view{ display:none; animation: fadein .25s ease; }
+  .view.active{ display:block; }
+  @keyframes fadein{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);} }
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    display:inline-flex; align-items:center; gap:7px; justify-content:center;
+    padding:9px 16px; border-radius:9px; font-size:13.5px; font-weight:600;
+    border:1px solid var(--paper-line); background:var(--card); color:var(--text-strong);
+    transition: all .15s ease; white-space:nowrap;
+  }
+  .btn:hover{ border-color:#c9c3b3; background:#fbfaf6; }
+  .btn svg{ width:15px; height:15px; }
+  .btn-primary{ background:var(--ink); color:#f4f1e9; border-color:var(--ink); }
+  .btn-primary:hover{ background:#232d38; }
+  .btn-brass{ background:var(--brass); color:#fff; border-color:var(--brass); }
+  .btn-brass:hover{ background:#8a6a35; }
+  .btn-ghost{ background:transparent; border-color:transparent; color:var(--text-soft); }
+  .btn-ghost:hover{ background:var(--paper-2); color:var(--text-strong); }
+  .btn-danger-line{ color:var(--red); border-color:rgba(162,59,59,0.3); background:#fff; }
+  .btn-sm{ padding:6px 11px; font-size:12.5px; border-radius:7px; }
+  .btn:disabled{ opacity:.45; cursor:not-allowed; }
+
+  /* ---------- Card / table ---------- */
+  .card{ background:var(--card); border:1px solid var(--paper-line); border-radius:var(--radius); box-shadow:var(--shadow-1); }
+  .card-pad{ padding:22px 24px; }
+  .card-header{ display:flex; align-items:center; justify-content:space-between; padding:18px 22px; border-bottom:1px solid var(--paper-line); gap:14px; flex-wrap:wrap;}
+  .card-header h3{ margin:0; font-family:'Noto Serif KR', serif; font-size:16.5px; font-weight:600; color:var(--text-strong);}
+  .card-header .hint{ font-size:12px; color:var(--text-soft); margin-top:3px;}
+
+  table{ width:100%; border-collapse:collapse; font-size:13.5px; }
+  thead th{
+    text-align:left; font-size:11.5px; letter-spacing:.4px; text-transform:uppercase;
+    color:var(--text-soft); font-weight:600; padding:11px 16px; border-bottom:1px solid var(--paper-line);
+    background:#fbfaf6;
+  }
+  tbody td{ padding:13px 16px; border-bottom:1px solid #f1efe7; color:var(--text); vertical-align:middle;}
+  tbody tr:last-child td{ border-bottom:none; }
+  tbody tr:hover{ background:#fbfaf6; }
+  .table-wrap{ overflow-x:auto; }
+
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:12.5px; font-weight:600; color:var(--text); margin-bottom:6px; }
+  .field input, .field select, .field textarea{
+    width:100%; padding:9px 12px; border-radius:8px; border:1px solid #d8d3c4;
+    font-size:13.5px; color:var(--text-strong); background:#fff;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{ outline:none; border-color:var(--brass); box-shadow:0 0 0 3px var(--brass-dim); }
+  .field-row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .field .req{ color:var(--red); }
+
+  .badge{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:999px; font-size:11.5px; font-weight:700; letter-spacing:.2px;}
+  .badge-class{ background:var(--brass-dim); color:#7a5f2e; }
+  .pill{ padding:3px 9px; border-radius:7px; font-size:11.5px; font-weight:600; }
+  .pill-ok{ background:var(--green-bg); color:var(--green); }
+  .pill-warn{ background:var(--amber-bg); color:var(--amber); }
+  .pill-bad{ background:var(--red-bg); color:var(--red); }
+  .pill-watch{ background:var(--watch-bg); color:var(--watch); }
+  .pill-mute{ background:#efece3; color:var(--text-soft); }
+
+  /* ---------- Seal (signature element) ---------- */
+  .seal{
+    width:34px; height:34px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; position:relative;
+    font-family:'Noto Serif KR', serif; font-weight:700; font-size:13px;
+  }
+  .seal::before{ content:''; position:absolute; inset:-3px; border-radius:50%; border:1px solid currentColor; opacity:.35; }
+  .seal.g{ background:var(--green-bg); color:var(--green); }
+  .seal.y{ background:var(--amber-bg); color:var(--amber); }
+  .seal.r{ background:var(--red-bg); color:var(--red); }
+  .seal.n{ background:#eee; color:#999; }
+  .seal-lg{ width:52px; height:52px; font-size:19px; }
+  .seal-sm{ width:22px; height:22px; font-size:0; }
+  .seal-sm::after{ content:''; width:7px; height:7px; border-radius:50%; background:currentColor; }
+
+  .seal-row{ display:flex; gap:5px; align-items:center; }
+
+  /* ---------- Stat cards ---------- */
+  .stat-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px; }
+  .stat-card{
+    background:var(--card); border:1px solid var(--paper-line); border-radius:var(--radius);
+    padding:20px 20px 18px; position:relative; overflow:hidden;
+  }
+  .stat-card .stat-label{ font-size:12px; color:var(--text-soft); font-weight:600; letter-spacing:.2px; }
+  .stat-card .stat-num{ font-family:'Noto Serif KR', serif; font-size:34px; font-weight:700; color:var(--text-strong); margin-top:6px; line-height:1;}
+  .stat-card .stat-sub{ font-size:11.5px; color:var(--text-soft); margin-top:8px; }
+  .stat-card .stat-bar{ position:absolute; left:0; top:0; bottom:0; width:4px; }
+  .stat-bar.green{ background:var(--green); } .stat-bar.amber{ background:var(--amber);} .stat-bar.red{background:var(--red);} .stat-bar.ink{background:var(--ink);} .stat-bar.watch{background:var(--watch);}
+
+  /* ---------- 경영 대시보드: 수평 막대 ---------- */
+  .hbar-row{ display:flex; align-items:center; gap:12px; padding:6px 0; }
+  .hbar-label{ width:118px; flex-shrink:0; font-size:13px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .hbar-track{ flex:1; height:10px; background:var(--paper-2); border-radius:6px; overflow:hidden; }
+  .hbar-fill{ height:100%; border-radius:6px; background:var(--brass); }
+  .hbar-fill.ink{ background:var(--ink-3); }
+  .hbar-num{ width:38px; text-align:right; font-size:13px; font-weight:700; color:var(--text-strong); flex-shrink:0; }
+  .kpi-row2{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-bottom:20px; }
+  .mini-stat{ background:var(--card); border:1px solid var(--paper-line); border-radius:var(--radius); padding:18px 20px; }
+  .mini-stat .lbl{ font-size:12px; color:var(--text-soft); font-weight:600; }
+  .mini-stat .val{ font-family:'Noto Serif KR', serif; font-size:28px; font-weight:700; color:var(--text-strong); margin-top:4px; }
+  .mini-stat .sub{ font-size:11.5px; color:var(--text-soft); margin-top:6px; }
+
+  /* ---------- Utility ---------- */
+  .flex{ display:flex; align-items:center; }
+  .gap-8{ gap:8px; } .gap-10{ gap:10px; } .gap-14{ gap:14px; }
+  .between{ justify-content:space-between; }
+  .wrap{ flex-wrap:wrap; }
+  .muted{ color:var(--text-soft); }
+  .mt-0{margin-top:0;} .mb-0{margin-bottom:0;}
+  .search-input{ position:relative; }
+  .search-input svg{ position:absolute; left:12px; top:50%; transform:translateY(-50%); width:15px; height:15px; color:var(--text-soft); }
+  .search-input input{ padding-left:34px; }
+  .toolbar{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+  .chip-filter{
+    padding:6px 13px; border-radius:999px; font-size:12.5px; font-weight:600; border:1px solid var(--paper-line);
+    background:var(--card); color:var(--text-soft); flex-shrink:0;
+  }
+  .chip-filter.active{ background:var(--ink); color:#f4f1e9; border-color:var(--ink); }
+  .empty-state{ text-align:center; padding:60px 20px; color:var(--text-soft); }
+  .empty-state svg{ width:38px; height:38px; margin-bottom:10px; opacity:.5; }
+
+  /* ---------- Modal ---------- */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(16,22,29,0.55); display:none;
+    align-items:center; justify-content:center; z-index:100; padding:20px; backdrop-filter: blur(2px);
+  }
+  .modal-overlay.active{ display:flex; }
+  .modal{
+    background:#fff; border-radius:16px; width:100%; max-width:560px; max-height:88vh; overflow-y:auto;
+    box-shadow:var(--shadow-2); animation: modalIn .18s ease;
+  }
+  @keyframes modalIn{ from{opacity:0; transform:translateY(10px) scale(.98);} to{opacity:1; transform:translateY(0) scale(1);} }
+  .modal-head{ padding:20px 24px; border-bottom:1px solid var(--paper-line); display:flex; align-items:center; justify-content:space-between; }
+  .modal-head h3{ margin:0; font-family:'Noto Serif KR', serif; font-size:17px; }
+  .modal-body{ padding:22px 24px; }
+  .modal-foot{ padding:16px 24px; border-top:1px solid var(--paper-line); display:flex; justify-content:flex-end; gap:8px; }
+  .modal-close{ width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--text-soft); background:transparent; border:none;}
+  .modal-close:hover{ background:var(--paper-2); }
+
+  /* toast */
+  #toast-wrap{ position:fixed; bottom:22px; right:22px; z-index:200; display:flex; flex-direction:column; gap:8px; }
+  .toast{
+    background:var(--ink); color:#f4f1e9; padding:12px 18px; border-radius:10px; font-size:13px; font-weight:500;
+    box-shadow:var(--shadow-2); display:flex; align-items:center; gap:10px; animation: toastIn .2s ease;
+    border:1px solid rgba(201,168,106,0.25);
+  }
+  @keyframes toastIn{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+
+  /* login */
+  .login-screen{ min-height:100vh; display:flex; align-items:center; justify-content:center; background: radial-gradient(circle at 20% 10%, #1c242e, var(--ink) 60%); padding:20px;}
+  .login-card{ background:var(--paper); border-radius:20px; width:100%; max-width:440px; padding:40px 38px; box-shadow:var(--shadow-2); }
+  .login-brand{ text-align:center; margin-bottom:26px; }
+  .login-brand .brand-mark{ width:56px; height:56px; font-size:22px; margin:0 auto 14px; border-color:var(--brass); color:var(--brass); }
+  .login-brand h1{ font-family:'Noto Serif KR', serif; font-size:21px; margin:0 0 4px; color:var(--text-strong);}
+  .login-brand p{ font-size:12.5px; color:var(--text-soft); margin:0; letter-spacing:.3px;}
+  .role-option{
+    display:flex; align-items:center; gap:13px; padding:14px 16px; border-radius:12px; border:1.5px solid var(--paper-line);
+    background:#fff; margin-bottom:10px; cursor:pointer; transition: all .15s ease;
+  }
+  .role-option:hover{ border-color:var(--brass-light); }
+  .role-option .role-icon{ width:38px; height:38px; border-radius:50%; background:var(--brass-dim); color:var(--brass); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .role-option .role-icon svg{ width:18px; height:18px; }
+  .role-option .rt{ font-size:14px; font-weight:700; color:var(--text-strong); }
+  .role-option .rs{ font-size:12px; color:var(--text-soft); margin-top:1px;}
+  .role-option .arrow{ margin-left:auto; color:var(--text-soft); }
+
+  /* legend */
+  .legend{ display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--text-soft); }
+  .legend .item{ display:flex; align-items:center; gap:6px; }
+  .legend .dot{ width:9px; height:9px; border-radius:50%; }
+
+  /* status buttons for homework */
+  .status-btns{ display:flex; gap:6px; flex-wrap:wrap; }
+  .status-btn{
+    padding:6px 11px; border-radius:7px; font-size:12px; font-weight:600; border:1.5px solid #e1ddd0; background:#fff; color:var(--text-soft);
+  }
+  .status-btn.sel-ok{ background:var(--green-bg); border-color:var(--green); color:var(--green); }
+  .status-btn.sel-warn{ background:var(--amber-bg); border-color:var(--amber); color:var(--amber); }
+  .status-btn.sel-bad{ background:var(--red-bg); border-color:var(--red); color:var(--red); }
+  .status-btn.sel-pass{ background:#eef2f7; border-color:#8496ac; color:#4f6076; }
+
+  /* 영상숙제: 챕터별 한 화면 체크용 셀렉트 */
+  .vsel-cell{ padding:6px 8px !important; }
+  .vsel{ width:100%; min-width:96px; padding:7px 6px; border-radius:7px; border:1.5px solid #e1ddd0; font-size:12px; font-weight:600; background:#fff; color:var(--text-soft); appearance:none; -webkit-appearance:none; text-align:center; }
+  .vsel.vsel-ok{ background:var(--green-bg); border-color:var(--green); color:var(--green); }
+  .vsel.vsel-warn{ background:var(--amber-bg); border-color:var(--amber); color:var(--amber); }
+  .vsel.vsel-bad{ background:var(--red-bg); border-color:var(--red); color:var(--red); }
+  .vcount{ width:100%; margin-top:5px; padding:5px 4px; border-radius:6px; border:1.5px solid #e1ddd0;
+           font-size:12px; font-weight:700; text-align:center; font-family:inherit; }
+  .vcount:disabled{ background:#f4f2ec; color:#b4b0a4; }
+  .vcomment{ width:100%; min-width:140px; padding:7px 8px; border-radius:7px; border:1.5px solid #e1ddd0;
+             font-size:12.5px; font-family:inherit; background:#fff; }
+  .vcomment:focus{ outline:none; border-color:var(--brass); }
+  .vsel.vsel-pass{ background:#eef2f7; border-color:#8496ac; color:#4f6076; font-weight:700; }
+  .video-chapter-head{ display:flex; flex-direction:column; align-items:center; gap:2px; }
+  .video-chapter-head .cnt{ font-size:10.5px; font-weight:600; color:var(--text-soft); }
+  .video-chapter-head .cnt.done{ color:var(--green); }
+
+  .divider{ height:1px; background:var(--paper-line); margin:18px 0; }
+
+  .checklist-row{ display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid #f1efe7;}
+  .checklist-row:last-child{ border-bottom:none; }
+
+  .print-only{ display:none; }
+
+  @media print{
+    .sidebar, .topbar, .no-print{ display:none !important; }
+    .content{ padding:0; max-width:100%; }
+    body{ background:#fff; }
+    .print-only{ display:block; }
+  }
+
+  @media (max-width: 980px){
+    .sidebar{ width:210px; }
+    .stat-grid{ grid-template-columns:repeat(2,1fr); }
+    .field-row{ grid-template-columns:1fr; }
+  }
+  @media (max-width: 760px){
+    #app{ flex-direction:column; }
+    .sidebar{ width:100%; height:auto; position:relative; flex-direction:column; align-items:stretch; }
+    .sidebar-brand{ border-bottom:1px solid var(--ink-line); flex-shrink:0; position:relative; }
+    .mobile-nav-toggle{ display:flex; margin-left:auto; background:transparent; border:none; color:#eef0f2; padding:6px; }
+    .sidebar-nav{
+      display:none; flex-direction:column; padding:8px;
+      position:absolute; top:100%; left:0; right:0; z-index:60;
+      background:var(--ink); max-height:70vh; overflow-y:auto;
+      box-shadow:0 12px 30px rgba(0,0,0,0.35);
+    }
+    .sidebar-nav.mobile-open{ display:flex; }
+    .nav-item{ flex-direction:row; font-size:14px; gap:11px; padding:12px 14px; white-space:nowrap;}
+    .sidebar-footer{ display:none; }
+    .topbar{ padding:16px 18px; flex-direction:column; align-items:flex-start; gap:10px;}
+    .content{ padding:18px; }
+    .stat-grid{ grid-template-columns:1fr 1fr; }
+  }
+  .mobile-nav-toggle{ display:none; cursor:pointer; }
+  @media (max-width: 760px){
+    /* 휴대폰에서 체크 표를 쓸 수 있게 — 이름 열을 고정하고 옆으로만 밀어서 봅니다 */
+    .table-wrap{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+    .table-wrap table{ font-size:12.5px; }
+    .table-wrap th, .table-wrap td{ padding:9px 7px !important; }
+    .table-wrap thead th:first-child{ position:sticky; left:0; z-index:3; background:#efece2; }
+    .table-wrap tbody td:first-child{ position:sticky; left:0; z-index:2; background:#fff;
+      box-shadow:3px 0 6px rgba(0,0,0,0.07); }
+    .vsel{ min-width:86px; font-size:12px; padding:10px 5px; }
+    .status-btn{ padding:10px 12px; font-size:12.5px; }
+    .toolbar{ flex-wrap:wrap; gap:8px; }
+    .toolbar > *{ flex-shrink:0; }
+    .card-header{ flex-wrap:wrap; gap:10px; }
+    .field-row{ grid-template-columns:1fr !important; }
+    .vcomment{ min-width:180px; }
+  }
+  .mobile-only-navitem{ display:none; }
+  @media (max-width: 760px){
+    .mobile-only-navitem{ display:flex; border-top:1px solid var(--ink-line); margin-top:6px; padding-top:14px; }
+    /* [수정] 위쪽에서 .mobile-nav-toggle{display:none}이 나중에 선언되어 햄버거 버튼이
+       모든 화면에서 숨겨져 있었습니다. 그래서 휴대폰에서 메뉴를 열 방법이 없었습니다. */
+    .mobile-nav-toggle{
+      display:flex !important; align-items:center; justify-content:center;
+      margin-left:auto; background:rgba(255,255,255,0.10); border:none;
+      color:#eef0f2; padding:9px; border-radius:9px; min-width:44px; min-height:44px;
+    }
+  }
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+<!-- ========================= LOGIN ========================= -->
+<div id="login-screen" class="login-screen">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="brand-mark">N</div>
+      <h1>남쌤 ERC 학원</h1>
+      <p>시험 · 숙제 체크 &nbsp;·&nbsp; 위험군 자동 관리</p>
+    </div>
+    <div id="role-options"></div>
+    <p style="text-align:center; font-size:11.5px; color:var(--text-soft); margin-top:16px;">역할을 선택하면 해당 업무 화면으로 바로 이동합니다</p>
+  </div>
+</div>
+
+<!-- ========================= APP ========================= -->
+<div id="app" style="display:none;">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark">N</div>
+      <div class="brand-text">
+        <div class="title">남쌤 ERC 학원</div>
+        <div class="sub">시험 · 숙제 체크</div>
+      </div>
+      <button class="mobile-nav-toggle" id="mobile-nav-toggle" onclick="toggleMobileNav()" aria-label="메뉴 열기">
+        <svg viewBox="0 0 24 24" fill="none" width="22" height="22"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <nav class="sidebar-nav" id="sidebar-nav"></nav>
+    <div class="sidebar-footer">
+      <div class="role-card" onclick="logout()">
+        <div class="role-avatar" id="role-avatar">원</div>
+        <div>
+          <div class="role-name" id="role-name-label">원장</div>
+          <div class="role-switch">역할 변경 →</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="eyebrow" id="topbar-eyebrow">DASHBOARD</div>
+        <h1 id="topbar-title">주간 위험군 대시보드</h1>
+        <div class="desc" id="topbar-desc">이번 주 학생 현황을 한눈에 확인하세요</div>
+      </div>
+      <div class="topbar-right no-print">
+        <div class="today-chip">
+          <svg viewBox="0 0 24 24" fill="none" width="14" height="14"><path d="M8 2v4M16 2v4M3 9h18M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.6"/></svg>
+          <span id="today-label"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="content" id="content-root">
+      <!-- views injected here -->
+    </div>
+  </div>
+</div>
+
+<div id="toast-wrap"></div>
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" id="modal-box"></div>
+</div>
+
+<script>
+/* =========================================================================
+   남쌤 ERC 학원 · 시험·숙제 체크 웹앱
+   - 데이터는 Firebase(Firestore)에 저장되어 원장/조교가 어느 기기에서 접속해도 같은 데이터를 실시간으로 봅니다.
+   - 화면은 하나의 HTML 안에서 JS로 전환합니다 (SPA 방식).
+   ========================================================================= */
+
+/* ---------------------- 1. 상수/메타 데이터 ---------------------- */
+
+const CLASSES = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N'];
+
+// 실제 'ERC_영상숙제검사' 파일에서 그대로 추출한 반별 학생 명단 (이름, 학년)
+// G·H·I반은 해당 검사지에 데이터가 없어 비워둡니다 — 원생 목록 화면에서 직접 등록해주세요.
+const CLASS_ROSTER = {
+  A: [["서진",2], ["윤서",2], ["민채",2], ["하린",2], ["채은",2], ["도혜",3], ["아인",3], ["민성",5], ["은서",5]],
+  B: [["예승",3], ["지안",3], ["소윤",3], ["하윤",3], ["예나",3], ["하영",3], ["민후",3], ["건희",5], ["진우",5], ["하은",5]],
+  C: [["나온",3], ["서우",3], ["선우",3], ["예나",3], ["지원",3], ["태빈",3], ["하겸",3], ["하윤",3], ["강민",3], ["세아",3], ["태희",3]],
+  D: [["예은",1], ["준호",1], ["하준",1], ["선호",1], ["준서",1], ["세아",1], ["예린",1], ["라온",1], ["민서",1], ["인우",1], ["조현",1]],
+  E: [["수아",4], ["수진",4], ["규리",4], ["요완",4], ["라희",4], ["하은",4], ["서율",4], ["채원",5], ["민건",5], ["범",5]],
+  F: [["서이",5], ["찬빈",5], ["유나",5], ["채린",5], ["예봄",5], ["승욱",5], ["민서",5], ["서하",5], ["다인",5]],
+  G: [],
+  H: [],
+  I: [],
+  J: [["소연",2], ["도경",2], ["승준",2], ["우진",2], ["윤하",3], ["여진",3], ["예인",3], ["하윤",4]],
+  K: [["진후",2], ["로운",2], ["다연",3], ["효담",3], ["유찬",3], ["보민",3], ["동혁",3], ["다혜",4]],
+  L: [["현민",2], ["지원",3], ["지후",4], ["지윤",4], ["정호",4], ["현아",5], ["서윤",5], ["아영",5], ["기범",5], ["예준",6]],
+  M: [["루아",3], ["수호",4], ["준호",4], ["지안",4], ["다현",4], ["연우",5], ["소현",5], ["호영",5], ["민준",5], ["유담",6], ["진우",5]],
+  N: [],
+};
+
+// 시험 종류 메타 정보. type: 'score'=점수 채점, 'pass'=통과여부, 'level'=레벨 통과
+const EXAM_META = {
+  alpha:   { name:'알파 Unit 복습시험', type:'score', cycle:'주 1~2회' },
+  monthly: { name:'월말테스트',         type:'score', cycle:'월 1회' },
+  erc:     { name:'ERC 원서발표',       type:'pass',  cycle:'월 1회' },
+  evt:     { name:'EVT 보컬레벨',       type:'level', cycle:'개별 진도' },
+  word_meaning: { name:'단어시험(뜻쓰기)', type:'score', cycle:'주 2회' },
+  word_pron:    { name:'단어시험(발음)',   type:'pass',  cycle:'주 2회' },
+  phonics: { name:'파닉스 시험',        type:'score', cycle:'주 1~2회' },
+};
+
+// 반별 응시 시험표 (앞선 대화에서 확정된 매칭)
+const CLASS_EXAMS = {
+  A:['alpha','monthly','erc','evt'],
+  B:['alpha','monthly','erc','evt'],
+  C:['alpha','monthly','erc','evt','word_meaning','word_pron'],
+  D:['alpha','monthly','erc','evt','phonics'],
+  E:['alpha','monthly','erc','evt','word_meaning','word_pron'],
+  F:['alpha','monthly','erc','evt','word_meaning','word_pron'],
+  G:['alpha','monthly','erc','evt','word_meaning','word_pron'],
+  H:['alpha','monthly','erc','evt','word_meaning','word_pron'],
+  I:['alpha','monthly','erc','evt','word_meaning','word_pron'],
+  J:['alpha','monthly','erc','evt'],
+  K:['alpha','monthly','erc','evt','phonics'],
+  L:['alpha','monthly','erc','evt'],
+  M:['alpha','monthly','erc','evt','word_meaning','word_pron'],
+  N:['alpha','monthly','erc','evt','word_meaning','word_pron'],
+};
+
+const WRITING_STATUS = ['제출완료','완성도미흡','PASS','현장보완','미제출'];
+// 완성도미흡 = 내긴 냈지만 글씨·완성도가 기준 미달. 제출로 인정하지 않고 '문제 있음'으로 셉니다.
+
+// 영상숙제 5종 — 실제 검사지 열 순서(ERC·단어·알파·독서감상·일기) 그대로
+const VIDEO_TYPES = [
+  {key:'video_erc', name:'ERC'},
+  {key:'video_word', name:'단어'},
+  {key:'video_alpha', name:'알파'},
+  {key:'video_report', name:'독서감상'},
+  {key:'video_diary', name:'일기'},
+  {key:'video_event', name:'이벤트'},
+];
+
+// 실제 검사지 체크 방식(O/△/X 3단계)과는 별개로, 화면에서 상세 사유까지 바로 고를 수 있도록 7단계로 표시합니다
+const VIDEO_STATUS = ['정상제출','PASS','자세불량','길이미달','잘못된영상','중복업로드','현장보완','미제출'];
+// PASS = 아파서·여행 등 사유를 미리 알려온 경우. 체크는 했지만 제출·미제출 어느 쪽으로도 세지 않고 넘어갑니다.
+
+// 검사지에 있던 반별 수업 시간 (참고용 표시)
+const CLASS_TIME = {
+  A:'2:00 - 3:25', B:'2:00 - 3:25', C:'2:45 - 4:10', D:'3:30 - 4:55',
+  E:'4:15 - 5:40', F:'5:00 - 6:25', G:'5:45 - 7:10', H:'6:30 - 9:30', I:'6:30 - 9:30',
+  J:'4:15 - 5:40', K:'2:45 - 4:10', L:'5:00 - 6:25', M:'4:15 - 5:40',
+};
+// 실제 검사지에는 A,B,C,D,E,F,J,K,L,M 10개 반만 있었음 (G,H,I는 영상숙제 대상 아님 — 설정에서 조정 가능)
+let CLASS_HAS_VIDEO = ['A','B','C','D','E','F','J','K','L','M'];
+
+// ---- 반 명칭 개편 (박상민 교수님 컨설팅 반영) ----
+// 학부모님께 보이는 이름은 "요일코드-레벨번호"만 노출합니다 (학년 정보는 뺐습니다 — 학년이 섞인 반이 많고,
+// 특정 학년으로 보이면 다른 학년 학부모님이 불편해하실 수 있어서입니다).
+// 요일코드: 4D = 월~목 4일, MW = 월수 2일, TR = 화목 2일 (Thursday의 R, 대학 시간표 표기 관례)
+// 레벨번호: 5칸씩 띄워서 배정 — 나중에 더 초급/중급 레벨이 생겨도 기존 반 번호를 안 밀고 사이 번호를 쓸 수 있습니다.
+// 내부 데이터(className: A,B,C...)는 절대 바꾸지 않습니다 — 기존 출결/시험 기록과의 연결을 지키기 위함입니다.
+const CLASS_DISPLAY_CODE_DEFAULT = {
+  D:'4D-05', K:'4D-10', L:'4D-15', J:'4D-20', A:'4D-25', B:'4D-30', M:'4D-35',
+  C:'4D-40', E:'4D-45', F:'4D-50', N:'TR-55', G:'MW-60', H:'MW-65', I:'TR-70',
+};
+// 학부모/조교님 혼란을 줄이기 위해, 전환 기간 동안 기존 반명(알파벳)을 괄호로 같이 표시합니다.
+// 레벨(진도) 정보는 웹에는 넣지 않습니다 — 별도 시간표 문서에서 관리합니다.
+// 코드 자체는 DB.settings.classDisplayCode에 저장되어, 설정 화면에서 직접 바꾸거나 백업파일로도 넣을 수 있습니다.
+function classLabel(cls){
+  const map = (DB.settings && DB.settings.classDisplayCode) || CLASS_DISPLAY_CODE_DEFAULT;
+  return (map[cls] || CLASS_DISPLAY_CODE_DEFAULT[cls] || cls) + `반 (${cls})`;
+}
+// 엑셀/CSV처럼 정확한 문자열 일치가 필요한 곳에 쓰는 짧은 코드 (예: "4D-25", 접미사·괄호 없음)
+function classCode(cls){
+  const map = (DB.settings && DB.settings.classDisplayCode) || CLASS_DISPLAY_CODE_DEFAULT;
+  return map[cls] || CLASS_DISPLAY_CODE_DEFAULT[cls] || cls;
+}
+
+const ROLES = {
+  director: { label:'원장', short:'원', desc:'전체 현황 확인 · 보강/문자 · 설정' },
+  exam_teacher: { label:'시험·쓰기숙제 조교', short:'시', desc:'월/수, 화/목 교대 · 시험 채점 · 쓰기숙제' },
+  video_teacher: { label:'영상숙제 조교', short:'영', desc:'월/화/목 근무 · 영상숙제 상태 체크' },
+};
+
+const STATUS_META = {
+  '재원': { pill:'pill-ok' },
+  '휴원': { pill:'pill-warn' },
+  '퇴원': { pill:'pill-bad' },
+};
+
+/* ---------------------- 2. 데이터베이스 (공유 저장소) ---------------------- */
+
+const STORAGE_KEY = 'namssaem-erc-db-v3'; // 백업 파일 안의 버전 표시용으로만 사용
+
+// ---- Firebase 설정 ----
+const firebaseConfig = {
+  apiKey: "AIzaSyCWPHppxZVFfsC4TaX-cyQh-4lKFdajaes",
+  authDomain: "namssaem-erc.firebaseapp.com",
+  projectId: "namssaem-erc",
+  storageBucket: "namssaem-erc.firebasestorage.app",
+  messagingSenderId: "57879799376",
+  appId: "1:57879799376:web:0d22a0ffc11d99b2d01355",
+  measurementId: "G-04KK2PT9QY"
+};
+firebase.initializeApp(firebaseConfig);
+const firestore = firebase.firestore();
+const FIRESTORE_DOC = firestore.collection('app_data').doc('main');
+
+let DB = {
+  students: [],
+  examRecords: [],
+  homeworkRecords: [],
+  videoNotes: {},    // { "className::weekKey": "비고 텍스트" }
+  videoComments: {}, // { "studentId::date": "학생별 코멘트" }  ← 학생 한 명 한 명에게 남기는 메모
+  remedial: {},      // { "studentId::weekKey": {sent:bool, done:bool, message:string} }
+  classHistory: [],  // [{id, studentId, fromClass, toClass, changedAt, teacher}]
+  holidays: [],      // [{date:'YYYY-MM-DD', label:'설날 연휴'}]
+  statusHistory: [], // [{id, studentId, fromStatus, toStatus, changedAt, note, teacher}]
+  settings: {
+    scoreThreshold: 70,   // (구버전 호환용 기본값 — 개별 설정이 없을 때만 사용)
+    examThresholds: { alpha:70, monthly:70, word_meaning:70, phonics:70 },
+    yellowIssueCount: 1,
+    redIssueCount: 2,
+    videoClasses: ['A','B','C','D','E','F','J','K','L','M'],
+    rolePins: { director:'', exam_teacher:'', video_teacher:'' },
+    watchWindowWeeks: 3,
+    watchThreshold: 2,
+    classDisplayCode: {
+      D:'4D-05', K:'4D-10', L:'4D-15', J:'4D-20', A:'4D-25', B:'4D-30', M:'4D-35',
+      C:'4D-40', E:'4D-45', F:'4D-50', N:'TR-55', G:'MW-60', H:'MW-65', I:'TR-70',
+    },
+  },
+};
+
+let currentRole = null;
+let currentView = 'overview';
+
+function uid(prefix){ return prefix + '_' + Math.random().toString(36).slice(2,9); }
+
+/* ==========================================================================
+   [삭제됨] seedDemoData() — 샘플(가짜) 데이터 자동 생성기
+   --------------------------------------------------------------------------
+   이 함수가 실행되면 실제 시험·숙제 기록을 전부 지우고, 오늘 날짜로
+   "이미 체크한 것처럼 보이는" 가짜 기록을 학생당 6건(쓰기 1 + 영상 5)씩
+   만들어 냈습니다. 인터넷이 잠깐만 끊겨도 실행될 수 있는 구조였습니다.
+   가짜 기록이 생길 여지를 완전히 없애기 위해 함수 자체를 제거했습니다.
+   ========================================================================== */
+
+function fmtDate(d){
+  const dt = (d instanceof Date) ? d : new Date(d);
+  const y = dt.getFullYear(), m=String(dt.getMonth()+1).padStart(2,'0'), day=String(dt.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function fmtDateKR(d){
+  const dt=(d instanceof Date)?d:new Date(d);
+  return `${dt.getFullYear()}년 ${dt.getMonth()+1}월 ${dt.getDate()}일`;
+}
+
+// 마지막 체크 시각을 "3분 전" 같은 상대 시간으로 표시 (여러 조교가 동시에 쓸 때 누가 방금 체크했는지 보여주기 위함)
+function relativeTime(iso){
+  if(!iso) return '';
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const min = Math.floor(diffMs/60000);
+  if(min<1) return '방금 전';
+  if(min<60) return `${min}분 전`;
+  const hr = Math.floor(min/60);
+  if(hr<24) return `${hr}시간 전`;
+  const d = new Date(iso);
+  return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+function isRecent(iso, mins){ if(!iso) return false; return (Date.now()-new Date(iso).getTime()) < mins*60000; }
+
+/* ==========================================================================
+   [안전장치] 기록이 사라지지 않도록 하는 저장 로직
+   --------------------------------------------------------------------------
+   예전 방식은 저장할 때마다 "내 화면에 있는 내용"으로 서버 전체를 통째로
+   덮어썼습니다. 그래서 내 화면이 잠깐이라도 옛날 상태였으면, 그 사이 다른
+   조교(또는 다른 기기/다른 탭)가 넣은 체크가 통째로 사라졌습니다.
+   이제는 저장 직전에 서버 내용을 다시 읽어와서 "합친 뒤"에 저장합니다.
+   ========================================================================== */
+
+const ID_ARRAYS  = ['students','examRecords','homeworkRecords','classHistory','statusHistory'];
+const MAP_FIELDS = ['videoNotes','videoComments','remedial'];
+
+let _serverKnown = { ids:new Set(), holidays:new Set(), videoNotes:new Set(), remedial:new Set() };
+let _saveLocked  = false;   // 불러오기 실패 시 저장을 잠가서 덮어쓰기 사고를 막습니다
+let _loadFailed  = false;
+let _allowBigDelete = false;
+
+// 서버에 무엇이 있었는지 기억해 둡니다 (내가 지운 것과 남이 새로 넣은 것을 구분하기 위함)
+function rememberServerState(data){
+  const ids = new Set();
+  ID_ARRAYS.forEach(k=> (data[k]||[]).forEach(r=>{ if(r && r.id) ids.add(k+'::'+r.id); }));
+  _serverKnown.ids        = ids;
+  _serverKnown.holidays   = new Set((data.holidays||[]).map(h=>h && h.date).filter(Boolean));
+  _serverKnown.videoNotes = new Set(Object.keys(data.videoNotes||{}));
+  _serverKnown.remedial   = new Set(Object.keys(data.remedial||{}));
+}
+
+function _newerOf(a, b){
+  const ta = a && a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+  const tb = b && b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+  return tb > ta ? b : a;
+}
+
+// 서버 내용(remote)과 내 화면 내용(local)을 안전하게 합칩니다
+function mergeWithServer(remote, local){
+  const out = Object.assign({}, remote, local);
+
+  ID_ARRAYS.forEach(key=>{
+    const localArr  = Array.isArray(local[key])  ? local[key]  : [];
+    const remoteArr = Array.isArray(remote[key]) ? remote[key] : [];
+    const localMap  = new Map();
+    localArr.forEach(r=>{ if(r && r.id) localMap.set(r.id, r); });
+    const merged = [], used = new Set();
+    remoteArr.forEach(r=>{
+      if(!r || !r.id){ merged.push(r); return; }
+      if(localMap.has(r.id)){
+        merged.push(_newerOf(r, localMap.get(r.id)));      // 양쪽에 있으면 최근 것
+        used.add(r.id);
+      } else if(_serverKnown.ids.has(key+'::'+r.id)){
+        used.add(r.id);                                     // 내가 지운 기록 → 되살리지 않음
+      } else {
+        merged.push(r);                                     // 남이 새로 넣은 기록 → 반드시 살림
+      }
+    });
+    localArr.forEach(r=>{ if(r && r.id && !used.has(r.id)) merged.push(r); });
+    out[key] = merged;
+  });
+
+  // 휴무일은 id가 없어 날짜를 기준으로 합칩니다
+  {
+    const localArr  = Array.isArray(local.holidays)  ? local.holidays  : [];
+    const remoteArr = Array.isArray(remote.holidays) ? remote.holidays : [];
+    const localDates = new Set(localArr.map(h=>h && h.date));
+    const merged = [];
+    remoteArr.forEach(h=>{
+      if(!h || !h.date) return;
+      if(localDates.has(h.date)) return;
+      if(_serverKnown.holidays.has(h.date)) return;         // 내가 지운 것
+      merged.push(h);
+    });
+    out.holidays = merged.concat(localArr);
+  }
+
+  MAP_FIELDS.forEach(key=>{
+    const localObj  = local[key]  || {};
+    const remoteObj = remote[key] || {};
+    const merged = {};
+    Object.keys(remoteObj).forEach(k=>{
+      if(k in localObj) return;
+      if(_serverKnown[key].has(k)) return;                  // 내가 지운 항목
+      merged[k] = remoteObj[k];
+    });
+    Object.keys(localObj).forEach(k=>{ merged[k] = localObj[k]; });
+    out[key] = merged;
+  });
+
+  out.settings = Object.assign({}, remote.settings||{}, local.settings||{});
+  return out;
+}
+
+// 저장에 성공할 때마다 이 브라우저에도 사본을 남깁니다 (만약을 위한 보험)
+function saveLocalSafetyCopy(data){
+  try{
+    localStorage.setItem('namssaem_last_save', JSON.stringify({ at:new Date().toISOString(), data }));
+  }catch(e){ /* 용량 초과 등은 무시 */ }
+}
+
+async function loadDB(){
+  _loadFailed = false;
+  // 통신이 한 번 삐끗했다고 "데이터가 없다"고 판단하면 대형 사고가 납니다. 3번까지 다시 시도합니다.
+  for(let attempt=1; attempt<=3; attempt++){
+    try{
+      const snap = await FIRESTORE_DOC.get();
+      if(snap.exists){
+        const parsed = snap.data();
+        rememberServerState(parsed);
+        DB = Object.assign(DB, parsed);
+        return true;
+      }
+      return false;                   // 문서가 정말로 없는 경우
+    }catch(e){
+      console.error('불러오기 실패 (시도 '+attempt+'/3)', e);
+      if(attempt < 3){ await new Promise(r=>setTimeout(r, 1500*attempt)); }
+      else { _loadFailed = true; }     // 통신 실패 — 이 상태로 저장하면 절대 안 됩니다
+    }
+  }
+  return false;
+}
+
+async function saveDB(){
+  if(_saveLocked){
+    toast('연결 문제로 저장이 잠겨 있어요. 페이지를 새로고침해주세요.', true);
+    return false;
+  }
+  try{
+    // Firestore는 undefined 값을 허용하지 않으므로 JSON 왕복으로 안전하게 정리합니다
+    const clean = JSON.parse(JSON.stringify(DB));
+    // [감시] 사람이 체크한 기록에는 반드시 시각(updatedAt)이 붙습니다.
+    // 시각이 없는 숙제 기록 = 사람이 만들지 않은 기록. 발견되면 알려줍니다.
+    const suspect = (clean.homeworkRecords||[]).filter(r=> r && !r.updatedAt).length;
+    if(suspect > 0){
+      console.warn('[주의] 사람이 만들지 않은 숙제 기록 ' + suspect + '건이 남아 있습니다. 설정 화면에서 정리하세요.');
+    }
+    const merged = await firestore.runTransaction(async (tx)=>{
+      const snap   = await tx.get(FIRESTORE_DOC);
+      const remote = snap.exists ? snap.data() : {};
+      const result = mergeWithServer(remote, clean);
+      // [안전장치] 이번 저장으로 기록이 갑자기 크게 줄어들면 일단 멈추고 물어봅니다
+      if(!_allowBigDelete){
+        const before = (remote.homeworkRecords||[]).length + (remote.examRecords||[]).length;
+        const after  = (result.homeworkRecords||[]).length + (result.examRecords||[]).length;
+        if(before >= 20 && after < before*0.7){
+          const err = new Error('MASS_DELETE'); err.code='MASS_DELETE';
+          err.before = before; err.after = after; throw err;
+        }
+      }
+      tx.set(FIRESTORE_DOC, result);
+      return result;
+    });
+    DB = Object.assign(DB, merged);
+    rememberServerState(merged);
+    saveLocalSafetyCopy(merged);
+    return true;
+  }catch(e){
+    if(e && e.code==='MASS_DELETE'){
+      const go = confirm('⚠️ 잠깐만요!\n\n이번 저장으로 기록이 '+e.before+'건 → '+e.after+'건으로 크게 줄어듭니다.\n실수로 대량 삭제되는 상황일 수 있어요.\n\n정말 진행할까요?\n(확실하지 않으면 [취소]를 누르고 페이지를 새로고침하세요)');
+      if(!go){ toast('저장을 취소했어요. 기록은 그대로입니다.', true); return false; }
+      _allowBigDelete = true;
+      const r = await saveDB();
+      _allowBigDelete = false;
+      return r;
+    }
+    console.error('저장 실패', e);
+    toast('저장 실패! 화면의 체크가 서버에 반영되지 않았어요. 인터넷 연결을 확인하고 다시 시도해주세요.', true);
+    return false;
+  }
+}
+
+// 다른 조교/원장이 저장하면 실시간으로 화면에 반영됩니다
+function startRealtimeSync(){
+  FIRESTORE_DOC.onSnapshot(snap=>{
+    if(!snap.exists) return;
+    const data = snap.data();
+    rememberServerState(data);
+    // 비고란에 입력 중이어도 데이터는 반영하고, 입력 중이던 글자만 그대로 되살립니다
+    // (예전에는 이때 서버 내용을 통째로 버려서 화면이 옛날 상태로 굳어졌고,
+    //  그 상태로 저장하면 남의 체크가 사라졌습니다)
+    const typing = !!(document.activeElement && document.activeElement.id==='hw-v-note');
+    let draft = null, caret = null;
+    if(typing){
+      const el = document.getElementById('hw-v-note');
+      if(el){ draft = el.value; caret = el.selectionStart; }
+    }
+    DB = Object.assign(DB, data);
+    refreshCurrentViewData();
+    if(typing && draft!==null){
+      const el = document.getElementById('hw-v-note');
+      if(el){
+        el.value = draft;
+        el.focus();
+        try{ el.setSelectionRange(caret, caret); }catch(_){}
+      }
+    }
+  }, err=> console.error('실시간 동기화 오류', err));
+}
+function refreshCurrentViewData(){
+  if(!currentRole) return; // 아직 로그인 전
+  if(currentView==='homework-writing' && document.getElementById('hw-w-tbody')) drawWritingTable();
+  else if(currentView==='homework-video' && document.getElementById('hw-v-tbody')) drawVideoTable();
+  else if(currentView==='dashboard' && document.getElementById('dash-tbody')) drawDashboardTable();
+  else if(currentView==='overview' && document.getElementById('view-inner')) renderOverview(document.getElementById('view-inner'));
+}
+
+/* ---------------------- 3. 주차 계산 ---------------------- */
+
+function getWeekKey(dateStr){
+  const d = new Date(dateStr);
+  const dt = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = (dt.getUTCDay()+6)%7; // 월=0
+  dt.setUTCDate(dt.getUTCDate()-dayNum+3);
+  const firstThu = new Date(Date.UTC(dt.getUTCFullYear(),0,4));
+  const week = 1 + Math.round(((dt-firstThu)/86400000 - 3 + ((firstThu.getUTCDay()+6)%7))/7);
+  return `${dt.getUTCFullYear()}-W${String(week).padStart(2,'0')}`;
+}
+function currentWeekKey(){ return getWeekKey(fmtDate(new Date())); }
+
+// 시험 종류별 기준 점수 조회 (개별 설정이 없으면 공통 기본값으로 대체)
+function getExamThreshold(examType){
+  if(DB.settings.examThresholds && DB.settings.examThresholds[examType]!=null){
+    return DB.settings.examThresholds[examType];
+  }
+  return DB.settings.scoreThreshold || 70;
+}
+
+// 휴무일 판별 (공휴일·방학 등 학원 문을 안 연 날) — 미체크 카운터가 거짓 경보를 내지 않도록 씁니다
+function holidayInfo(dateStr){ return DB.holidays.find(h=>h.date===dateStr) || null; }
+function isHoliday(dateStr){ return !!holidayInfo(dateStr); }
+
+// 주어진 날짜가 속한 주의 월요일~일요일 7개 날짜(YYYY-MM-DD)를 반환
+function getWeekDates(dateStr){
+  const d = new Date(dateStr);
+  const dayNum = (d.getDay()+6)%7; // 월=0 ... 일=6
+  const monday = new Date(d); monday.setDate(d.getDate()-dayNum);
+  const out = [];
+  for(let i=0;i<7;i++){ const x=new Date(monday); x.setDate(monday.getDate()+i); out.push(fmtDate(x)); }
+  return out;
+}
+const DOW_LABEL = ['월','화','수','목','금','토','일'];
+
+function getMonthKey(dateStr){
+  const d = new Date(dateStr);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+function currentMonthKey(){ return getMonthKey(fmtDate(new Date())); }
+
+/* ---------------------- 4. 위험군 판정 로직 ---------------------- */
+/*
+  주간 위험군 판정 (매주 리셋 — 이번 주 데이터만 사용):
+  - examIssues   : 이번 주 시험기록 중 기준 미달(score) 또는 미통과(pass/level) 건수
+  - writingIssues: 이번 주 쓰기숙제 기록 중 '현장보완' 또는 '미제출' 건수
+  - videoIssues  : 이번 주 영상숙제 기록 중 '정상제출'이 아닌 건수 (단, 'PASS'는 제외)
+  - PASS         : 아파서·여행 등 사전에 연락받은 경우. 이슈로도, 제출로도 세지 않고 넘어갑니다.
+  - 빨강: 세 항목 중 하나라도 settings.redIssueCount 이상
+  - 노랑: 위 빨강 조건에 해당하지 않으면서 이슈 합계가 1개 이상
+  - 초록: 이슈가 전혀 없음
+*/
+function computeWeeklyGrade(studentId, weekKey){
+  const s = DB.students.find(x=>x.id===studentId);
+  if(!s) return null;
+  const exams = DB.examRecords.filter(r=>r.studentId===studentId && getWeekKey(r.date)===weekKey);
+  const hws = DB.homeworkRecords.filter(r=>r.studentId===studentId && getWeekKey(r.date)===weekKey);
+
+  const examDetail = [];
+  let examIssues = 0;
+  exams.forEach(r=>{
+    const meta = EXAM_META[r.examType];
+    let bad=false;
+    if(meta.type==='score'){ bad = r.score < getExamThreshold(r.examType); }
+    else { bad = r.passed===false; }
+    if(bad){ examIssues++; examDetail.push(meta.name + (meta.type==='score' ? ` ${r.score}점 미달` : ' 미통과')); }
+  });
+
+  let writingIssues=0; const writingDetail=[];
+  hws.filter(r=>r.type==='writing').forEach(r=>{
+    if(r.status==='PASS') return;   // 사유 있는 결석·미실시 — 이슈로 세지 않습니다
+    if(r.status!=='제출완료'){ writingIssues++; writingDetail.push(`쓰기숙제 ${r.status}`); }
+  });
+
+  let videoIssues=0; const videoDetail=[];
+  hws.filter(r=>r.type.startsWith('video_')).forEach(r=>{
+    if(r.status==='PASS') return;   // 사유 있는 결석·미실시 — 이슈로 세지 않습니다
+    if(r.status!=='정상제출'){
+      videoIssues++;
+      const vt = VIDEO_TYPES.find(v=>v.key===r.type);
+      videoDetail.push(`${vt?vt.name:r.type}영상 ${r.status}`);
+    }
+  });
+
+  const totalIssues = examIssues+writingIssues+videoIssues;
+  let grade='green';
+  if(examIssues>=DB.settings.redIssueCount || writingIssues>=DB.settings.redIssueCount || videoIssues>=DB.settings.redIssueCount){
+    grade='red';
+  } else if(totalIssues>=DB.settings.yellowIssueCount){
+    grade='yellow';
+  }
+
+  return {
+    studentId, weekKey, grade,
+    examIssues, writingIssues, videoIssues, totalIssues,
+    detail: [...examDetail, ...writingDetail, ...videoDetail],
+    hasAnyRecord: exams.length>0 || hws.length>0,
+  };
+}
+
+function gradeLabel(g){ return g==='red' ? '위험' : g==='yellow' ? '주의' : g==='green' ? '정상' : '기록없음'; }
+function gradeSealClass(g){ return g==='red'?'r':g==='yellow'?'y':g==='green'?'g':'n'; }
+function gradeSealChar(g){ return g==='red'?'✕':g==='yellow'?'!':g==='green'?'✓':'-'; }
+
+/*
+  연속 위험군(관찰 필요) 판정:
+  이번 주만 보면 괜찮아 보여도, 최근 N주 중 M주 이상 노랑/빨강이었다면
+  "관찰 필요" 학생으로 별도 표시합니다. 매주 리셋되는 등급만으로는
+  이런 반복 패턴이 묻히기 때문에 따로 계산합니다.
+  N(watchWindowWeeks), M(watchThreshold)은 설정 화면에서 조정할 수 있습니다.
+*/
+function computeWatchFlag(studentId){
+  const windowWeeks = (DB.settings.watchWindowWeeks) || 3;
+  const threshold = (DB.settings.watchThreshold) || 2;
+  const weeks = [];
+  for(let i=windowWeeks-1;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-7*i); weeks.push(getWeekKey(fmtDate(d))); }
+  const grades = weeks.map(w=>computeWeeklyGrade(studentId, w));
+  const badWeeks = grades.filter(g=>g.hasAnyRecord && (g.grade==='yellow' || g.grade==='red'));
+  return { watch: badWeeks.length>=threshold, badCount: badWeeks.length, windowWeeks, threshold, weeks, grades };
+}
+
+/* ---------------------- 5. 공용 유틸 UI ---------------------- */
+
+function toast(msg, isError){
+  const wrap = document.getElementById('toast-wrap');
+  const el = document.createElement('div');
+  el.className='toast';
+  el.style.borderColor = isError ? 'rgba(162,59,59,0.4)' : 'rgba(201,168,106,0.25)';
+  el.innerHTML = `<span>${msg}</span>`;
+  wrap.appendChild(el);
+  setTimeout(()=>{ el.style.transition='opacity .3s ease'; el.style.opacity='0'; setTimeout(()=>el.remove(),300); }, 2600);
+}
+
+function openModal(html){
+  document.getElementById('modal-box').innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('active');
+}
+function closeModal(){ document.getElementById('modal-overlay').classList.remove('active'); }
+document.getElementById('modal-overlay').addEventListener('click', (e)=>{ if(e.target.id==='modal-overlay') closeModal(); });
+
+function esc(s){ return (s===undefined||s===null) ? '' : String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function studentName(id){ const s=DB.students.find(x=>x.id===id); return s? s.name : '(삭제됨)'; }
+function studentById(id){ return DB.students.find(x=>x.id===id); }
+
+// 형제/자매 판별: 학부모 연락처가 같으면(하이픈 등 표기 차이 무시) 같은 가구로 간주합니다
+function normalizePhone(p){ return (p||'').replace(/\D/g,''); }
+function householdOf(studentId){
+  const s = studentById(studentId);
+  if(!s) return [];
+  const norm = normalizePhone(s.parentPhone);
+  if(!norm) return [s];
+  return DB.students.filter(x=> normalizePhone(x.parentPhone)===norm);
+}
+
+/* ---------------------- 6. 로그인 / 네비게이션 ---------------------- */
+
+const ROLE_ICONS = {
+  director: `<svg viewBox="0 0 24 24" fill="none"><path d="M4 20v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`,
+  exam_teacher: `<svg viewBox="0 0 24 24" fill="none"><path d="M4 19.5V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14.5M9 7h6M9 11h6M9 15h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`,
+  video_teacher: `<svg viewBox="0 0 24 24" fill="none"><path d="M15 10.5 21 7v10l-6-3.5M4 6h9a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+};
+
+function renderLogin(){
+  const wrap = document.getElementById('role-options');
+  wrap.innerHTML = Object.entries(ROLES).map(([key, r])=>`
+    <div class="role-option" onclick="selectRole('${key}')">
+      <div class="role-icon">${ROLE_ICONS[key]}</div>
+      <div>
+        <div class="rt">${r.label}</div>
+        <div class="rs">${r.desc}</div>
+      </div>
+      <div class="arrow">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+  `).join('');
+}
+
+let currentTeacherName = '';
+
+function selectRole(role){
+  const pin = DB.settings.rolePins && DB.settings.rolePins[role];
+  if(pin){
+    openPinGate(role);
+  } else {
+    proceedAfterPin(role);
+  }
+}
+
+function openPinGate(role){
+  openModal(`
+    <div class="modal-head"><h3>${ROLES[role].label} · 잠금</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="field">
+        <label>PIN을 입력해주세요</label>
+        <input id="pin-input" type="password" inputmode="numeric" placeholder="••••" autofocus style="letter-spacing:4px; font-size:18px; text-align:center;">
+        <div id="pin-error" class="muted" style="font-size:12px; margin-top:6px; color:var(--red); display:none;">PIN이 올바르지 않아요</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal()">취소</button>
+      <button class="btn btn-primary" onclick="checkPinGate('${role}')">확인</button>
+    </div>
+  `);
+  setTimeout(()=>{
+    const el = document.getElementById('pin-input');
+    if(el){ el.focus(); el.addEventListener('keydown', e=>{ if(e.key==='Enter') checkPinGate(role); }); }
+  }, 50);
+}
+
+function checkPinGate(role){
+  const input = document.getElementById('pin-input').value;
+  const pin = DB.settings.rolePins && DB.settings.rolePins[role];
+  if(input===pin){
+    closeModal();
+    proceedAfterPin(role);
+  } else {
+    document.getElementById('pin-error').style.display = 'block';
+    const el = document.getElementById('pin-input');
+    el.value=''; el.focus();
+    el.style.borderColor = 'var(--red)';
+  }
+}
+
+function proceedAfterPin(role){
+  if(role==='director'){
+    enterApp(role, ROLES[role].label);
+    return;
+  }
+  // 조교 역할은 교대 근무자가 여러 명일 수 있어 이름을 받아 구분합니다
+  openModal(`
+    <div class="modal-head"><h3>${ROLES[role].label}</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="field">
+        <label>이름을 입력해주세요</label>
+        <input id="teacher-name-input" placeholder="예: 김민지" autofocus>
+        <div class="muted" style="font-size:11.5px; margin-top:6px;">여러 조교님이 같은 화면을 쓰기 때문에, 누가 체크했는지 표시하는 데 사용돼요.</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal()">취소</button>
+      <button class="btn btn-primary" onclick="confirmTeacherName('${role}')">시작하기</button>
+    </div>
+  `);
+  setTimeout(()=>{ const el=document.getElementById('teacher-name-input'); if(el){ el.focus(); el.addEventListener('keydown', e=>{ if(e.key==='Enter') confirmTeacherName(role); }); } }, 50);
+}
+
+function confirmTeacherName(role){
+  const nameEl = document.getElementById('teacher-name-input');
+  const name = nameEl ? nameEl.value.trim() : '';
+  closeModal();
+  enterApp(role, name || ROLES[role].label);
+}
+
+function enterApp(role, teacherName){
+  currentRole = role;
+  currentTeacherName = teacherName;
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='flex';
+  document.getElementById('role-avatar').textContent = ROLES[role].short;
+  document.getElementById('role-name-label').textContent = teacherName!==ROLES[role].label ? `${teacherName} · ${ROLES[role].label}` : ROLES[role].label;
+  const dflt = role==='video_teacher' ? 'homework-video' : (role==='director' ? 'overview' : 'dashboard');
+  currentView = dflt;
+  renderNav();
+  renderView(currentView);
+  if(role==='director'){
+    const last = DB.settings.lastBackupAt;
+    const days = last ? (Date.now()-new Date(last).getTime())/86400000 : Infinity;
+    if(days>7){
+      setTimeout(()=> toast(last? '백업한 지 일주일이 넘었어요 — 설정에서 백업해두세요' : '아직 백업한 적이 없어요 — 설정에서 백업 파일을 받아두세요'), 600);
+    }
+  }
+}
+function currentTeacherLabel(){ return currentTeacherName || ROLES[currentRole].label; }
+function logout(){
+  stopLiveSync();
+  currentRole=null;
+  currentTeacherName='';
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+}
+
+const NAV_ITEMS = [
+  { key:'overview', label:'경영 대시보드', roles:['director'], icon:`<svg viewBox="0 0 24 24" fill="none"><path d="M3 3v18h18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 15l4-5 3 3 5-7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
+  { key:'dashboard', label:'주간 위험군 대시보드', roles:['director'], icon:`<svg viewBox="0 0 24 24" fill="none"><path d="M4 19V10M10 19V5M16 19v-7M22 19H2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>` },
+  { key:'students', label:'원생 목록', roles:['director','exam_teacher','video_teacher'], icon:`<svg viewBox="0 0 24 24" fill="none"><path d="M17 20v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1M9 12a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM19 20v-1a3.5 3.5 0 0 0-2.5-3.36M15 4.6A3.5 3.5 0 0 1 15 11.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>` },
+  { key:'exam-input', label:'시험 성적 입력', roles:['director','exam_teacher'], icon:`<svg viewBox="0 0 24 24" fill="none"><path d="M12 2 3 7v6c0 5 4 8.5 9 9 5-.5 9-4 9-9V7l-9-5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
+  { key:'homework-writing', label:'쓰기숙제 체크', roles:['director','exam_teacher'], icon:`<svg viewBox="0 0 24 24" fill="none"><path d="M4 19.5V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v13.5M8 8h8M8 12h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>` },
+  { key:'homework-video', label:'영상숙제 체크', roles:['director','video_teacher'], icon:`<svg viewBox="0 0 24 24" fill="none"><path d="M15 10.5 21 7v10l-6-3.5M4 6h9a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>` },
+  { key:'remedial', label:'보강 대상 관리', roles:['director'], icon:`<svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-4.35-9.5-8.5C.6 8.9 2.4 5 6 5c2 0 3.4 1.1 4 2.2C10.6 6.1 12 5 14 5c3.6 0 5.4 3.9 3.5 7.5C19 16.65 12 21 12 21Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>` },
+  { key:'report', label:'월간 리포트', roles:['director'], icon:`<svg viewBox="0 0 24 24" fill="none"><path d="M7 3h10a1 1 0 0 1 1 1v16l-6-3-6 3V4a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>` },
+  { key:'term-report', label:'학기·분기 리포트', roles:['director'], icon:`<svg viewBox="0 0 24 24" fill="none"><path d="M4 19h16M7 19v-6m5 6V7m5 12v-9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>` },
+  { key:'settings', label:'설정', roles:['director'], icon:`<svg viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" stroke-width="1.6"/><path d="M19.4 13a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V19a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 13a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 6.91a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 2.6a1.65 1.65 0 0 0 1-1.51V1a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V6a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" stroke="currentColor" stroke-width="1.3"/></svg>` },
+];
+
+function renderNav(){
+  const nav = document.getElementById('sidebar-nav');
+  const items = NAV_ITEMS.filter(n=>n.roles.includes(currentRole));
+  nav.innerHTML = `<div class="nav-section-label">메뉴</div>` + items.map(n=>`
+    <a href="javascript:void(0)" class="nav-item ${currentView===n.key?'active':''}" onclick="renderView('${n.key}'); closeMobileNav();">
+      ${n.icon}<span>${n.label}</span>
+    </a>
+  `).join('') + `
+    <a href="javascript:void(0)" class="nav-item mobile-only-navitem" onclick="closeMobileNav(); logout();">
+      <svg viewBox="0 0 24 24" fill="none" width="17" height="17"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>역할 변경 / 로그아웃</span>
+    </a>
+  `;
+}
+function toggleMobileNav(){ document.getElementById('sidebar-nav').classList.toggle('mobile-open'); }
+function closeMobileNav(){ document.getElementById('sidebar-nav').classList.remove('mobile-open'); }
+
+/* ---------------------- 7. 화면 라우팅 ---------------------- */
+
+const VIEW_META = {
+  'overview': {eyebrow:'OVERVIEW', title:'경영 대시보드', desc:'재원 현황, 위험군, 유입경로, 반별 분포를 한눈에 확인하세요'},
+  'dashboard': {eyebrow:'DASHBOARD', title:'주간 위험군 대시보드', desc:'이번 주 학생 현황을 색상 등급으로 한눈에 확인하세요'},
+  'students': {eyebrow:'STUDENTS', title:'원생 목록', desc:'반 배정과 기본 정보를 관리합니다'},
+  'exam-input': {eyebrow:'EXAM', title:'시험 성적 입력', desc:'반별로 응시해야 할 시험만 자동으로 표시됩니다'},
+  'homework-writing': {eyebrow:'HOMEWORK', title:'쓰기숙제 체크', desc:'오늘 날짜 기준으로 제출 여부를 체크하세요'},
+  'homework-video': {eyebrow:'HOMEWORK', title:'영상숙제 체크', desc:'날짜·반·영상 종류를 고르고 상태 버튼을 눌러 체크하세요'},
+  'remedial': {eyebrow:'REMEDIAL', title:'보강 대상 관리', desc:'위험(빨강) 등급 학생을 확인하고 학부모에게 안내합니다'},
+  'report': {eyebrow:'REPORT', title:'월간 리포트', desc:'한 달 치 성적·숙제 현황을 정리해 학부모에게 전달합니다'},
+  'term-report': {eyebrow:'ANALYTICS', title:'학기·분기 리포트', desc:'긴 기간의 흐름과 반별 비교를 한눈에 확인합니다'},
+  'settings': {eyebrow:'SETTINGS', title:'설정', desc:'위험군 판정 기준과 반별 시험 매칭을 조정합니다'},
+};
+
+// Firestore onSnapshot 실시간 리스너로 대체되어, 더 이상 15초 폴링이 필요 없습니다.
+// (호출부 호환을 위해 함수는 남겨두되 아무 동작도 하지 않습니다)
+function stopLiveSync(){}
+function startLiveSync(key){}
+
+function renderView(key){
+  currentView = key;
+  renderNav();
+  const meta = VIEW_META[key];
+  document.getElementById('topbar-eyebrow').textContent = meta.eyebrow;
+  document.getElementById('topbar-title').textContent = meta.title;
+  document.getElementById('topbar-desc').textContent = meta.desc;
+  const root = document.getElementById('content-root');
+  root.innerHTML = '<div class="view active" id="view-inner"></div>';
+  const inner = document.getElementById('view-inner');
+
+  if(key==='overview') renderOverview(inner);
+  else if(key==='dashboard') renderDashboard(inner);
+  else if(key==='students') renderStudents(inner);
+  else if(key==='exam-input') renderExamInput(inner);
+  else if(key==='homework-writing') renderHomeworkWriting(inner);
+  else if(key==='homework-video') renderHomeworkVideo(inner);
+  else if(key==='remedial') renderRemedial(inner);
+  else if(key==='report') renderReport(inner);
+  else if(key==='term-report') renderTermReport(inner);
+  else if(key==='settings') renderSettings(inner);
+
+  startLiveSync(key);
+  window.scrollTo({top:0, behavior:'instant'});
+}
+
+/* ---------------------- 7-1. 경영 대시보드 ---------------------- */
+
+function renderOverview(root){
+  const now = new Date();
+  const thisMonth = fmtDate(now).slice(0,7); // 'YYYY-MM'
+  const active = DB.students.filter(s=>(s.status||'재원')==='재원');
+  const totalActive = active.length;
+
+  // 이번 달 신규 / 퇴원
+  const newThisMonth = DB.students.filter(s=> (s.registeredAt||'').slice(0,7)===thisMonth).length;
+  const withdrawnThisMonth = (DB.statusHistory||[]).filter(h=> h.toStatus==='퇴원' && (h.changedAt||'').slice(0,10).slice(0,7)===thisMonth).length;
+
+  // 위험군 / 관찰 필요 (재원생 기준, 이번 주 등급)
+  const wk = currentWeekKey();
+  let riskCount = 0, watchCount = 0;
+  active.forEach(s=>{
+    const g = computeWeeklyGrade(s.id, wk);
+    const w = computeWatchFlag(s.id);
+    if(g.hasAnyRecord && g.grade==='red') riskCount++;
+    if(w.watch) watchCount++;
+  });
+
+  // 반별 인원 분포
+  const classCounts = CLASSES.map(c=>({ c, n: active.filter(s=>s.className===c).length }));
+  const maxClassCount = Math.max(1, ...classCounts.map(x=>x.n));
+
+  // 학교별 분포 (상위 8개)
+  const schoolMap = {};
+  active.forEach(s=>{ const sc = (s.school||'').trim() || '학교 미입력'; schoolMap[sc]=(schoolMap[sc]||0)+1; });
+  const schoolList = Object.entries(schoolMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const maxSchool = Math.max(1, ...schoolList.map(x=>x[1]));
+
+  // 유입경로 분포 (재원생 중 입력된 학생만)
+  const chanMap = {};
+  active.forEach(s=>{ const rs=(s.referralSource||'').trim(); if(rs) chanMap[rs]=(chanMap[rs]||0)+1; });
+  const chanEntered = Object.values(chanMap).reduce((a,b)=>a+b,0);
+  const chanList = Object.entries(chanMap).sort((a,b)=>b[1]-a[1]);
+  const chanUnknown = totalActive - chanEntered;
+  const maxChan = Math.max(1, ...chanList.map(x=>x[1]), chanUnknown);
+
+  // 형제자매 등록 비율
+  let siblingCount = 0;
+  active.forEach(s=>{ if(householdOf(s.id).filter(x=>x.id!==s.id).length) siblingCount++; });
+  const siblingPct = totalActive? Math.round(siblingCount/totalActive*100) : 0;
+
+  // 평균 재원 기간 (재원생 중 등록일이 있는 학생)
+  const withReg = active.filter(s=>s.registeredAt);
+  let avgMonths = null;
+  if(withReg.length){
+    const total = withReg.reduce((sum,s)=>{
+      const reg = new Date(s.registeredAt);
+      const m = (now.getFullYear()-reg.getFullYear())*12 + (now.getMonth()-reg.getMonth());
+      return sum + Math.max(0,m);
+    },0);
+    avgMonths = Math.round((total/withReg.length)*10)/10;
+  }
+
+  // 최근 퇴원 학생 (최대 6건)
+  const withdrawals = (DB.statusHistory||[]).filter(h=>h.toStatus==='퇴원')
+    .sort((a,b)=> (b.changedAt||'').localeCompare(a.changedAt||'')).slice(0,6)
+    .map(h=>({ h, s: studentById(h.studentId) }));
+
+  root.innerHTML = `
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-bar ink"></div><div class="stat-label">재원생 수</div><div class="stat-num">${totalActive}</div><div class="stat-sub">전체 등록 ${DB.students.length}명 중</div></div>
+      <div class="stat-card"><div class="stat-bar green"></div><div class="stat-label">이번 달 신규</div><div class="stat-num">+${newThisMonth}</div><div class="stat-sub">${thisMonth} 등록 기준</div></div>
+      <div class="stat-card"><div class="stat-bar red"></div><div class="stat-label">이번 달 퇴원</div><div class="stat-num">-${withdrawnThisMonth}</div><div class="stat-sub">${thisMonth} 퇴원 처리 기준</div></div>
+      <div class="stat-card"><div class="stat-bar watch"></div><div class="stat-label">위험군 · 관찰 필요</div><div class="stat-num">${riskCount} / ${watchCount}</div><div class="stat-sub">위험(빨강) / 관찰 필요 · <a href="javascript:void(0)" onclick="renderView('dashboard')" style="color:var(--brass); font-weight:700;">주간 대시보드 →</a></div></div>
+    </div>
+
+    <div class="kpi-row2">
+      <div class="mini-stat"><div class="lbl">형제·자매 등록 비율</div><div class="val">${siblingPct}%</div><div class="sub">재원생 ${totalActive}명 중 ${siblingCount}명이 형제·자매 함께 등록</div></div>
+      <div class="mini-stat"><div class="lbl">평균 재원 기간</div><div class="val">${avgMonths===null? '-' : avgMonths+'개월'}</div><div class="sub">${withReg.length? `등록일이 입력된 재원생 ${withReg.length}명 기준` : '등록일이 입력된 학생이 없어요'}</div></div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header"><div><h3>반별 인원 분포</h3><div class="hint">재원생 기준</div></div></div>
+      <div class="card-pad">
+        ${classCounts.filter(x=>x.n>0 || true).map(({c,n})=>`
+          <div class="hbar-row">
+            <div class="hbar-label" title="${classLabel(c)}">${classLabel(c)}</div>
+            <div class="hbar-track"><div class="hbar-fill" style="width:${n/maxClassCount*100}%"></div></div>
+            <div class="hbar-num">${n}명</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header"><div><h3>학교별 분포</h3><div class="hint">재원생이 많은 학교 상위 ${schoolList.length}곳</div></div></div>
+      <div class="card-pad">
+        ${schoolList.length? schoolList.map(([sc,n])=>`
+          <div class="hbar-row">
+            <div class="hbar-label" title="${esc(sc)}">${esc(sc)}</div>
+            <div class="hbar-track"><div class="hbar-fill ink" style="width:${n/maxSchool*100}%"></div></div>
+            <div class="hbar-num">${n}명</div>
+          </div>
+        `).join('') : `<div class="empty-state">학교 정보가 입력된 학생이 없어요</div>`}
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header"><div><h3>유입경로별 신규 등록 분포</h3><div class="hint">원생 목록의 "유입경로" 항목 기준 · 채널별 조회수와 비교하면 전환율을 계산할 수 있어요</div></div></div>
+      <div class="card-pad">
+        ${chanList.length? chanList.map(([ch,n])=>`
+          <div class="hbar-row">
+            <div class="hbar-label" title="${esc(ch)}">${esc(ch)}</div>
+            <div class="hbar-track"><div class="hbar-fill" style="width:${n/maxChan*100}%"></div></div>
+            <div class="hbar-num">${n}명</div>
+          </div>
+        `).join('') : ''}
+        ${chanUnknown>0? `
+          <div class="hbar-row">
+            <div class="hbar-label muted">경로 미입력</div>
+            <div class="hbar-track"><div class="hbar-fill" style="width:${chanUnknown/maxChan*100}%; background:#c9c3b3;"></div></div>
+            <div class="hbar-num muted">${chanUnknown}명</div>
+          </div>` : ''}
+        ${(!chanList.length && !chanUnknown)? `<div class="empty-state">재원생이 없어요</div>` : ''}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div><h3>최근 퇴원 학생</h3><div class="hint">최근 6건 · 사유는 상태 변경 시 남긴 메모예요</div></div></div>
+      <div class="card-pad">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>퇴원일</th><th>이름</th><th>반</th><th>사유</th></tr></thead>
+            <tbody>
+              ${withdrawals.length? withdrawals.map(({h,s})=>`
+                <tr>
+                  <td class="mono">${esc((h.changedAt||'').slice(0,10))}</td>
+                  <td>${s? esc(s.name) : '(삭제된 학생)'}</td>
+                  <td>${s? `<span class="badge badge-class">${classLabel(s.className)}</span>` : ''}</td>
+                  <td class="muted">${esc(h.note||'-')}</td>
+                </tr>
+              `).join('') : `<tr><td colspan="4"><div class="empty-state">최근 퇴원 기록이 없어요</div></td></tr>`}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ---------------------- 8. 대시보드 (주간 위험군) ---------------------- */
+
+function renderDashboard(root){
+  const wk = currentWeekKey();
+  const grades = DB.students.filter(s=>((s.status||'재원')==='재원')).map(s=>({s, g: computeWeeklyGrade(s.id, wk), w: computeWatchFlag(s.id)}));
+  const counts = { green:0, yellow:0, red:0, none:0, watch:0 };
+  grades.forEach(({g,w})=>{
+    if(!g.hasAnyRecord) counts.none++;
+    else counts[g.grade]++;
+    if(w.watch) counts.watch++;
+  });
+
+  root.innerHTML = `
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-bar green"></div><div class="stat-label">정상 (초록)</div><div class="stat-num">${counts.green}</div><div class="stat-sub">재원 ${grades.length}명 중</div></div>
+      <div class="stat-card"><div class="stat-bar amber"></div><div class="stat-label">주의 (노랑)</div><div class="stat-num">${counts.yellow}</div><div class="stat-sub">가벼운 미달 1건</div></div>
+      <div class="stat-card"><div class="stat-bar red"></div><div class="stat-label">위험 (빨강) · 보강대상</div><div class="stat-num">${counts.red}</div><div class="stat-sub">반복 미달 2건 이상</div></div>
+      <div class="stat-card"><div class="stat-bar watch"></div><div class="stat-label">관찰 필요</div><div class="stat-num">${counts.watch}</div><div class="stat-sub">최근 ${DB.settings.watchWindowWeeks||3}주 중 ${DB.settings.watchThreshold||2}주 이상</div></div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header">
+        <div>
+          <h3>반별 학생 현황</h3>
+          <div class="hint">이번 주차: ${wk} (매주 리셋) · 이름을 클릭하면 상세 사유를 볼 수 있어요</div>
+        </div>
+        <div class="legend no-print">
+          <div class="item"><span class="dot" style="background:var(--green)"></span>정상</div>
+          <div class="item"><span class="dot" style="background:var(--amber)"></span>주의</div>
+          <div class="item"><span class="dot" style="background:var(--red)"></span>위험</div>
+          <div class="item"><span class="dot" style="background:var(--watch)"></span>관찰 필요</div>
+        </div>
+      </div>
+      <div class="card-pad">
+        <div class="toolbar no-print">
+          <div class="chip-filter active" data-f="all" onclick="filterDashboard('all', this)">전체</div>
+          <div class="chip-filter" data-f="red" onclick="filterDashboard('red', this)">위험만</div>
+          <div class="chip-filter" data-f="yellow" onclick="filterDashboard('yellow', this)">주의만</div>
+          <div class="chip-filter" data-f="watch" onclick="filterDashboard('watch', this)">관찰 필요만</div>
+          <div class="chip-filter" data-f="green" onclick="filterDashboard('green', this)">정상만</div>
+          <div style="flex:1"></div>
+          <div class="search-input">
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <input placeholder="이름 검색" oninput="searchDashboard(this.value)" style="width:180px;">
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>등급</th><th>이름</th><th>반</th><th>학교/학년</th><th>이번 주 이슈</th><th>관찰</th><th></th></tr></thead>
+            <tbody id="dash-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+  window._dashGrades = grades.sort((a,b)=> rowOrder(a.g,a.w)-rowOrder(b.g,b.w) || a.s.className.localeCompare(b.s.className));
+  window._dashFilter = 'all';
+  window._dashSearch = '';
+  drawDashboardTable();
+}
+function rowOrder(g,w){
+  if(g.hasAnyRecord && g.grade==='red') return 0;
+  if(g.hasAnyRecord && g.grade==='yellow') return 1;
+  if(w.watch) return 1.5;
+  if(!g.hasAnyRecord) return 3;
+  return 2;
+}
+
+function filterDashboard(f, el){
+  window._dashFilter = f;
+  document.querySelectorAll('.chip-filter').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  drawDashboardTable();
+}
+function searchDashboard(v){ window._dashSearch = v.trim(); drawDashboardTable(); }
+
+function drawDashboardTable(){
+  const tbody = document.getElementById('dash-tbody');
+  let rows = window._dashGrades;
+  if(window._dashFilter==='watch') rows = rows.filter(r=>r.w.watch);
+  else if(window._dashFilter!=='all') rows = rows.filter(r=> r.g.hasAnyRecord && r.g.grade===window._dashFilter);
+  if(window._dashSearch) rows = rows.filter(r=> r.s.name.includes(window._dashSearch));
+
+  if(rows.length===0){
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">해당하는 학생이 없어요</div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = rows.map(({s,g,w})=>{
+    const gr = g.hasAnyRecord ? g.grade : 'none';
+    return `
+    <tr>
+      <td><div class="seal ${gradeSealClass(gr)}">${gradeSealChar(gr)}</div></td>
+      <td><a href="javascript:void(0)" onclick="openStudentDetail('${s.id}')" style="font-weight:700; color:var(--text-strong); text-decoration:none;">${esc(s.name)}</a> ${s.notes? `<span title="${esc(s.notes)}" style="cursor:help;">📌</span>`:''}</td>
+      <td><span class="badge badge-class">${classLabel(s.className)}</span></td>
+      <td class="muted">${esc(s.school||'학교 미입력')} · ${esc(s.grade||'-')}</td>
+      <td class="muted" style="max-width:280px;">${g.hasAnyRecord ? (g.detail.length? esc(g.detail.slice(0,2).join(', ')) + (g.detail.length>2? ` 외 ${g.detail.length-2}건`:'') : '이슈 없음') : '이번 주 입력 기록 없음'}</td>
+      <td>${w.watch? `<span class="pill pill-watch" title="최근 ${w.windowWeeks}주 중 ${w.badCount}주 노랑·빨강">관찰 필요</span>` : ''}</td>
+      <td><button class="btn btn-ghost btn-sm no-print" onclick="openStudentDetail('${s.id}')">상세</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function openStudentDetail(id){
+  const s = studentById(id);
+  const wk = currentWeekKey();
+  const g = computeWeeklyGrade(id, wk);
+  const w = computeWatchFlag(id);
+  // 최근 4주 흐름
+  const weeks = [];
+  for(let i=3;i>=0;i--){
+    const d = new Date(); d.setDate(d.getDate()-7*i);
+    weeks.push(getWeekKey(fmtDate(d)));
+  }
+  const trend = weeks.map(wk2=>computeWeeklyGrade(id,wk2));
+
+  openModal(`
+    <div class="modal-head">
+      <div class="flex gap-10"><div class="seal seal-lg ${gradeSealClass(g.hasAnyRecord?g.grade:'none')}">${gradeSealChar(g.hasAnyRecord?g.grade:'none')}</div>
+        <div><h3>${esc(s.name)}</h3><div class="muted" style="font-size:12.5px;">${classLabel(s.className)} · ${esc(s.school||'학교 미입력')} ${esc(s.grade||'-')}</div></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      ${s.notes? `<div style="background:var(--brass-dim); border:1px solid rgba(156,122,60,0.3); border-radius:10px; padding:12px 14px; margin-bottom:14px;">
+        <div style="font-size:11.5px; font-weight:700; color:var(--brass); text-transform:uppercase; letter-spacing:.4px; margin-bottom:5px;">📌 특이사항</div>
+        <div style="font-size:13.5px; color:var(--text-strong); white-space:pre-wrap; line-height:1.6;">${esc(s.notes)}</div>
+      </div>` : ''}
+      ${w.watch? `<div class="pill pill-watch" style="margin-bottom:14px; display:inline-block;">관찰 필요 · 최근 ${w.windowWeeks}주 중 ${w.badCount}주 노랑·빨강</div>` : ''}
+      <div style="font-size:12.5px; font-weight:700; color:var(--text-soft); text-transform:uppercase; letter-spacing:.4px; margin-bottom:10px;">최근 4주 등급 흐름</div>
+      <div class="seal-row" style="margin-bottom:20px;">
+        ${trend.map(t=>`<div class="seal seal-sm ${gradeSealClass(t.hasAnyRecord?t.grade:'none')}" title="${t.weekKey}"></div><span class="muted" style="font-size:11px;">${t.weekKey.slice(6)}</span>`).join('<span style="width:8px"></span>')}
+      </div>
+      <div class="divider"></div>
+      <div style="font-size:12.5px; font-weight:700; color:var(--text-soft); text-transform:uppercase; letter-spacing:.4px; margin-bottom:10px;">이번 주 (${wk}) 사유</div>
+      ${g.detail.length? `<ul style="margin:0; padding-left:18px; font-size:13.5px; line-height:1.9;">${g.detail.map(d=>`<li>${esc(d)}</li>`).join('')}</ul>` : `<div class="muted" style="font-size:13.5px;">${g.hasAnyRecord?'특별한 이슈가 없습니다.':'이번 주 입력된 기록이 아직 없습니다.'}</div>`}
+      <div class="divider"></div>
+      <div class="flex gap-10 wrap">
+        <div class="pill pill-mute">학부모 연락처 ${esc(s.parentPhone||'-')}</div>
+        <div class="pill pill-mute">등록일 ${esc(s.registeredAt||'-')}</div>
+        ${s.attendanceNo? `<div class="pill pill-mute">출결번호 ${esc(s.attendanceNo)}</div>` : ''}
+        ${s.address? `<div class="pill pill-mute">거주지 ${esc(s.address)}</div>` : ''}
+        ${s.referralSource? `<div class="pill pill-mute">유입경로 ${esc(s.referralSource)}</div>` : ''}
+        ${DB.classHistory.filter(h=>h.studentId===id).length? `<button class="pill pill-mute" style="cursor:pointer; border:none;" onclick="closeModal(); openClassHistory('${id}')">반 이동 ${DB.classHistory.filter(h=>h.studentId===id).length}회 보기</button>` : ''}
+        ${(()=>{ const hh=householdOf(id).filter(x=>x.id!==id); return hh.length? `<div class="pill pill-watch">형제·자매: ${esc(hh.map(h=>h.name+'('+h.className+'반)').join(', '))}</div>` : ''; })()}
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal()">닫기</button>
+    </div>
+  `);
+}
+
+/* ---------------------- 9. 원생 목록 ---------------------- */
+
+function renderStudents(root){
+  const canEdit = currentRole==='director';
+  const activeCount = DB.students.filter(s=>(s.status||'재원')==='재원').length;
+  root.innerHTML = `
+    <div class="card">
+      <div class="card-header">
+        <div><h3>원생 목록</h3><div class="hint">재원 ${activeCount}명 · 전체 ${DB.students.length}명 · ${CLASSES[0]}~${CLASSES[CLASSES.length-1]}반</div></div>
+        ${canEdit? `<button class="btn btn-brass" onclick="openStudentForm()">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          원생 등록</button>` : ''}
+      </div>
+      <div class="card-pad">
+        <div class="toolbar">
+          <div class="search-input">
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <input placeholder="이름/학교 검색" oninput="filterStudentsTable()" id="stu-search" style="width:200px;">
+          </div>
+          <select id="stu-class-filter" onchange="filterStudentsTable()" style="padding:8px 12px; border-radius:9px; border:1px solid var(--paper-line); font-size:13px;">
+            <option value="">전체 반</option>
+            ${CLASSES.map(c=>`<option value="${c}">${classLabel(c)}</option>`).join('')}
+          </select>
+          <select id="stu-status-filter" onchange="filterStudentsTable()" style="padding:8px 12px; border-radius:9px; border:1px solid var(--paper-line); font-size:13px;">
+            <option value="재원">재원만 보기</option>
+            <option value="휴원">휴원만 보기</option>
+            <option value="퇴원">퇴원만 보기</option>
+            <option value="">전체 (재원+휴원+퇴원)</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>이름</th><th>상태</th><th>반</th><th>학교</th><th>학년</th><th>학부모 연락처</th><th>등록일</th><th>응시 시험</th>${canEdit?'<th></th>':''}</tr></thead>
+            <tbody id="stu-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+  window._canEditStudents = canEdit;
+  filterStudentsTable();
+}
+
+function filterStudentsTable(){
+  const q = (document.getElementById('stu-search').value||'').trim();
+  const cls = document.getElementById('stu-class-filter').value;
+  const statusFilter = document.getElementById('stu-status-filter').value;
+  let rows = DB.students.filter(s=> (!q || s.name.includes(q) || s.school.includes(q)) && (!cls || s.className===cls) && (!statusFilter || (s.status||'재원')===statusFilter));
+  rows = rows.sort((a,b)=> a.className.localeCompare(b.className) || a.name.localeCompare(b.name));
+  const tbody = document.getElementById('stu-tbody');
+  const canEdit = window._canEditStudents;
+  if(rows.length===0){ tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">검색 결과가 없어요</div></td></tr>`; return; }
+  tbody.innerHTML = rows.map(s=>{
+    const historyCount = DB.classHistory.filter(h=>h.studentId===s.id).length;
+    const household = householdOf(s.id).filter(x=>x.id!==s.id);
+    const status = s.status || '재원';
+    const meta = STATUS_META[status] || STATUS_META['재원'];
+    return `
+    <tr ${status!=='재원'? 'style="opacity:.6;"':''}>
+      <td style="font-weight:700; color:var(--text-strong);">${esc(s.name)} ${s.notes? `<span title="${esc(s.notes)}" style="cursor:help;">📌</span>`:''}</td>
+      <td><span class="pill ${meta.pill}" style="cursor:${canEdit?'pointer':'default'};" ${canEdit?`onclick="openStatusChange('${s.id}')" title="클릭해서 상태 변경"`:''}>${status}</span></td>
+      <td><span class="badge badge-class">${classLabel(s.className)}</span> ${historyCount? `<button class="btn btn-ghost btn-sm" style="padding:2px 8px; margin-left:4px;" title="반 이동 이력 보기" onclick="openClassHistory('${s.id}')">이동${historyCount}회</button>`:''}</td>
+      <td class="muted">${esc(s.school||'-')}</td>
+      <td class="muted">${esc(s.grade||'-')}</td>
+      <td class="muted">${esc(s.parentPhone||'-')} ${household.length? `<span class="pill pill-watch" style="margin-left:4px; cursor:help;" title="형제·자매: ${esc(household.map(h=>h.name+'('+h.className+'반)').join(', '))}">형제 ${household.length}</span>`:''}</td>
+      <td class="muted">${esc(s.registeredAt||'-')}</td>
+      <td class="muted" style="font-size:12px;">${CLASS_EXAMS[s.className].map(e=>EXAM_META[e].name).join(', ')}</td>
+      ${canEdit? `<td><div class="flex gap-8">
+          <button class="btn btn-ghost btn-sm" onclick="openStudentForm('${s.id}')">수정</button>
+          <button class="btn btn-ghost btn-sm" style="color:var(--red);" onclick="deleteStudent('${s.id}')">완전삭제</button>
+        </div></td>`:''}
+    </tr>`;
+  }).join('');
+}
+
+function openStudentForm(id){
+  const s = id ? studentById(id) : null;
+  openModal(`
+    <div class="modal-head"><h3>${s?'원생 정보 수정':'원생 등록'}</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="field-row">
+        <div class="field"><label>이름 <span class="req">*</span></label><input id="f-name" value="${s?esc(s.name):''}"></div>
+        <div class="field"><label>반 <span class="req">*</span></label>
+          <select id="f-class" data-original="${s?s.className:''}">${CLASSES.map(c=>`<option value="${c}" ${s&&s.className===c?'selected':''}>${classLabel(c)}</option>`).join('')}</select>
+        </div>
+      </div>
+      ${s? `<div class="field" id="f-move-date-field" style="display:none;">
+        <label>반 이동일</label>
+        <input id="f-move-date" type="date" value="${fmtDate(new Date())}">
+        <div class="muted" style="font-size:11.5px; margin-top:4px;">반을 변경하면 이전 반 기록은 그대로 남고, 이 날짜로 이동 이력이 기록돼요.</div>
+      </div>` : ''}
+      <div class="field-row">
+        <div class="field"><label>학교</label><input id="f-school" value="${s?esc(s.school):''}"></div>
+        <div class="field"><label>학년</label><input id="f-grade" placeholder="예: 초2, 중3, 고1" value="${s?esc(s.grade):''}"></div>
+      </div>
+      <div class="field"><label>출결번호 <span class="muted" style="font-weight:400;">(결제선생·출결선생 등 다른 시스템의 학생 번호)</span></label><input id="f-attnum" placeholder="예: 7782" value="${s?esc(s.attendanceNo||''):''}"></div>
+      <div class="field"><label>학부모 연락처</label><input id="f-phone" placeholder="010-0000-0000" value="${s?esc(s.parentPhone):''}"></div>
+      <div class="field-row">
+        <div class="field"><label>등록일</label><input id="f-reg" type="date" value="${s?s.registeredAt:fmtDate(new Date())}"></div>
+        <div class="field"><label>유입경로 (추천인)</label><input id="f-referral" placeholder="예: 네이버플레이스, 인스타그램, OOO 학부모 추천" value="${s?esc(s.referralSource||''):''}"></div>
+      </div>
+      <div class="field"><label>거주지 주소</label><input id="f-address" placeholder="예: 주안뉴타운1단지 101동" value="${s?esc(s.address||''):''}"></div>
+      <div class="field">
+        <label>특이사항 (지속 메모)</label>
+        <textarea id="f-notes" rows="3" placeholder="예: 손이 느려서 시간을 더 줘야 함 / 땅콩 알레르기 있음 / 형이 D반 다님">${s?esc(s.notes||''):''}</textarea>
+        <div class="muted" style="font-size:11.5px; margin-top:4px;">위험군처럼 매주 사라지지 않고, 조교가 바뀌어도 계속 남아있는 메모예요.</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal()">취소</button>
+      <button class="btn btn-primary" onclick="saveStudent('${s?s.id:''}')">저장</button>
+    </div>
+  `);
+  if(s){
+    const classSelect = document.getElementById('f-class');
+    const moveField = document.getElementById('f-move-date-field');
+    classSelect.addEventListener('change', ()=>{
+      moveField.style.display = classSelect.value !== classSelect.dataset.original ? 'block' : 'none';
+    });
+  }
+}
+
+async function saveStudent(id){
+  const name = document.getElementById('f-name').value.trim();
+  if(!name){ toast('이름을 입력해주세요', true); return; }
+  const gradeVal = document.getElementById('f-grade').value.trim();
+  const newClass = document.getElementById('f-class').value;
+  const data = {
+    name,
+    className: newClass,
+    school: document.getElementById('f-school').value.trim(),
+    grade: gradeVal,
+    parentPhone: document.getElementById('f-phone').value.trim(),
+    attendanceNo: document.getElementById('f-attnum').value.trim(),
+    registeredAt: document.getElementById('f-reg').value,
+    referralSource: document.getElementById('f-referral').value.trim(),
+    address: document.getElementById('f-address').value.trim(),
+    notes: document.getElementById('f-notes').value.trim(),
+  };
+  let classChangedMsg = null;
+  if(id){
+    const s = studentById(id);
+    const oldClass = s.className;
+    if(oldClass !== newClass){
+      const moveDateEl = document.getElementById('f-move-date');
+      const movedAt = moveDateEl ? moveDateEl.value : fmtDate(new Date());
+      DB.classHistory.push({
+        id: uid('mv'), studentId: id, fromClass: oldClass, toClass: newClass,
+        changedAt: movedAt, teacher: currentTeacherLabel(),
+      });
+      classChangedMsg = `${oldClass}반 → ${newClass}반으로 이동 기록을 남겼어요`;
+    }
+    Object.assign(s, data);
+  } else {
+    DB.students.push(Object.assign({id:uid('stu'), studentPhone:'', status:'재원', statusNote:'', statusChangedAt:''}, data));
+  }
+  const ok = await saveDB();
+  closeModal();
+  if(ok) toast(classChangedMsg || '저장했어요');
+  renderStudents(document.getElementById('view-inner'));
+}
+
+async function deleteStudent(id){
+  if(!confirm('정말 완전 삭제할까요?\n\n시험·숙제 기록까지 전부 사라지며 되돌릴 수 없습니다.\n단순히 그만 다니는 학생이라면 취소하고 "상태" 배지를 눌러 휴원/퇴원으로 처리하는 걸 추천해요 — 그러면 기록이 보존됩니다.')) return;
+  DB.students = DB.students.filter(s=>s.id!==id);
+  DB.examRecords = DB.examRecords.filter(r=>r.studentId!==id);
+  DB.homeworkRecords = DB.homeworkRecords.filter(r=>r.studentId!==id);
+  DB.classHistory = DB.classHistory.filter(h=>h.studentId!==id);
+  DB.statusHistory = DB.statusHistory.filter(h=>h.studentId!==id);
+  const ok = await saveDB();
+  if(ok) toast('삭제했어요');
+  renderStudents(document.getElementById('view-inner'));
+}
+
+function openStatusChange(studentId){
+  const s = studentById(studentId);
+  const cur = s.status || '재원';
+  openModal(`
+    <div class="modal-head"><h3>${esc(s.name)} · 재원 상태 변경</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="field">
+        <label>상태</label>
+        <select id="status-new">
+          <option value="재원" ${cur==='재원'?'selected':''}>재원</option>
+          <option value="휴원" ${cur==='휴원'?'selected':''}>휴원</option>
+          <option value="퇴원" ${cur==='퇴원'?'selected':''}>퇴원</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>변경일</label>
+        <input id="status-date" type="date" value="${fmtDate(new Date())}">
+      </div>
+      <div class="field">
+        <label>사유 (선택)</label>
+        <input id="status-note" placeholder="예: 유학, 타학원 이동, 일시 중단 등" value="">
+      </div>
+      <div class="muted" style="font-size:11.5px;">휴원·퇴원으로 바꿔도 그동안의 시험·숙제 기록은 그대로 보존돼요. 나중에 다시 "재원"으로 돌리면 바로 복귀 처리돼요. 휴원·퇴원 상태인 동안은 일일 체크·대시보드·보강 명단에서 제외돼요.</div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal()">취소</button>
+      <button class="btn btn-primary" onclick="confirmStatusChange('${studentId}')">저장</button>
+    </div>
+  `);
+}
+
+async function confirmStatusChange(studentId){
+  const s = studentById(studentId);
+  const oldStatus = s.status || '재원';
+  const newStatus = document.getElementById('status-new').value;
+  const changedAt = document.getElementById('status-date').value;
+  const note = document.getElementById('status-note').value.trim();
+  if(oldStatus!==newStatus){
+    DB.statusHistory.push({ id:uid('st'), studentId, fromStatus:oldStatus, toStatus:newStatus, changedAt, note, teacher: currentTeacherLabel() });
+  }
+  s.status = newStatus;
+  s.statusNote = note;
+  s.statusChangedAt = changedAt;
+  const ok = await saveDB();
+  closeModal();
+  if(ok) toast(`${s.name} 학생을 '${newStatus}' 상태로 변경했어요`);
+  renderStudents(document.getElementById('view-inner'));
+}
+
+function openClassHistory(studentId){
+  const s = studentById(studentId);
+  const history = DB.classHistory.filter(h=>h.studentId===studentId).sort((a,b)=> a.changedAt<b.changedAt?1:-1);
+  openModal(`
+    <div class="modal-head"><h3>${esc(s.name)} · 반 이동 이력</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="muted" style="font-size:12.5px; margin-bottom:14px;">현재 반: <span class="badge badge-class">${classLabel(s.className)}</span></div>
+      ${history.length===0? `<div class="empty-state">이동 이력이 없어요</div>` : `
+        <div style="position:relative; padding-left:6px;">
+          ${history.map(h=>`
+            <div class="checklist-row" style="align-items:flex-start;">
+              <div class="seal seal-sm n" style="margin-top:3px; flex-shrink:0;"></div>
+              <div>
+                <div style="font-weight:700; font-size:13.5px;">${h.fromClass}반 → ${h.toClass}반</div>
+                <div class="muted" style="font-size:12px; margin-top:2px;">${h.changedAt} 이동 · ${esc(h.teacher||'')} 기록</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="muted" style="font-size:11.5px; margin-top:10px;">※ 이동일 이전 시험·숙제 기록은 이전 반 기준으로 남아있어요. 시험 종류가 바뀐 시점을 확인할 때 참고하세요.</div>
+      `}
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">닫기</button></div>
+  `);
+}
+
+/* ---------------------- 10. 시험 성적 입력 ---------------------- */
+
+function renderExamInput(root){
+  root.innerHTML = `
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header">
+        <div><h3>새 시험 기록 추가</h3><div class="hint">학생을 선택하면 그 반이 응시하는 시험만 표시됩니다</div></div>
+      </div>
+      <div class="card-pad">
+        <div class="field-row">
+          <div class="field"><label>반</label>
+            <select id="ei-class" onchange="onExamClassChange()">
+              <option value="">반 선택</option>
+              ${CLASSES.map(c=>`<option value="${c}">${classLabel(c)}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field"><label>학생</label><select id="ei-student"><option value="">먼저 반을 선택하세요</option></select></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>시험 종류</label><select id="ei-exam"><option value="">먼저 학생을 선택하세요</option></select></div>
+          <div class="field"><label>날짜</label><input type="date" id="ei-date" value="${fmtDate(new Date())}"></div>
+        </div>
+        <div id="ei-value-field"></div>
+        <button class="btn btn-brass" onclick="addExamRecord()">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          기록 추가</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header">
+        <div><h3>여러 범위 한 번에 입력</h3><div class="hint">단어시험처럼 한 날에 여러 범위를 볼 때 — 반 전체를 한 화면에서 입력합니다</div></div>
+      </div>
+      <div class="card-pad">
+        <div class="field-row">
+          <div class="field"><label>반</label>
+            <select id="be-class" onchange="onBulkExamClassChange()">
+              <option value="">반 선택</option>
+              ${CLASSES.map(c=>`<option value="${c}">${classLabel(c)}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field"><label>시험 종류</label><select id="be-exam" onchange="drawBulkExamGrid()"><option value="">먼저 반을 선택하세요</option></select></div>
+          <div class="field"><label>날짜</label><input type="date" id="be-date" value="${fmtDate(new Date())}"></div>
+        </div>
+        <div style="margin:6px 0 12px;">
+          <label style="font-size:12px; font-weight:700; color:var(--text-soft);">범위 (챕터)</label>
+          <div id="be-scopes" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;"></div>
+          <div style="margin-top:8px; display:flex; gap:8px;">
+            <button class="btn btn-ghost btn-sm" onclick="addScopeCol()">+ 범위 추가</button>
+            <button class="btn btn-ghost btn-sm" onclick="removeScopeCol()">− 범위 빼기</button>
+          </div>
+        </div>
+        <div class="table-wrap"><table><thead><tr id="be-thead"></tr></thead><tbody id="be-tbody"></tbody></table></div>
+        <button class="btn btn-brass" style="margin-top:14px;" onclick="saveBulkExam()">입력한 것 전부 저장</button>
+        <div class="muted" style="font-size:11.5px; margin-top:8px;">· 빈칸은 저장하지 않습니다. 일부만 채워도 괜찮아요.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h3>최근 시험 기록</h3><div class="hint">최근 입력한 순서대로 표시됩니다</div></div>
+      <div class="card-pad">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>날짜</th><th>학생</th><th>반</th><th>시험</th><th>결과</th><th>담당</th><th></th></tr></thead>
+            <tbody id="ei-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+  drawExamTable();
+  drawScopeInputs();
+}
+
+/* ── 여러 범위 한 번에 입력 ── */
+window._bulkScopes = ['1과','2과','3과','4과'];
+function drawScopeInputs(){
+  const box = document.getElementById('be-scopes');
+  if(!box) return;
+  box.innerHTML = window._bulkScopes.map((v,i)=>`
+    <input type="text" value="${esc(v)}" placeholder="범위 ${i+1}"
+      oninput="window._bulkScopes[${i}]=this.value; drawBulkExamGrid();"
+      style="width:110px; padding:8px 10px; border-radius:9px; border:1px solid var(--paper-line); font-family:inherit; font-size:13px;">`).join('');
+  drawBulkExamGrid();
+}
+function addScopeCol(){ if(window._bulkScopes.length>=10) return; window._bulkScopes.push('범위'+(window._bulkScopes.length+1)); drawScopeInputs(); }
+function removeScopeCol(){ if(window._bulkScopes.length<=1) return; window._bulkScopes.pop(); drawScopeInputs(); }
+
+function onBulkExamClassChange(){
+  const cls = document.getElementById('be-class').value;
+  const sel = document.getElementById('be-exam');
+  if(!cls){ sel.innerHTML='<option value="">먼저 반을 선택하세요</option>'; drawBulkExamGrid(); return; }
+  sel.innerHTML = (CLASS_EXAMS[cls]||[]).map(ek=>`<option value="${ek}">${EXAM_META[ek].name} (${EXAM_META[ek].cycle})</option>`).join('') || '<option value="">시험 없음</option>';
+  drawBulkExamGrid();
+}
+
+function drawBulkExamGrid(){
+  const thead = document.getElementById('be-thead'), tbody = document.getElementById('be-tbody');
+  if(!thead || !tbody) return;
+  const cls = document.getElementById('be-class').value;
+  const ek  = document.getElementById('be-exam').value;
+  const scopes = window._bulkScopes;
+  if(!cls || !ek){
+    thead.innerHTML=''; tbody.innerHTML = '<tr><td><div class="empty-state">반과 시험 종류를 선택하세요</div></td></tr>';
+    return;
+  }
+  const meta = EXAM_META[ek];
+  const students = DB.students.filter(s=>s.className===cls && (s.status||'재원')==='재원').sort((a,b)=>a.name.localeCompare(b.name));
+  thead.innerHTML = `<th style="min-width:90px;">이름</th>` + scopes.map(sc=>`<th style="text-align:center; min-width:96px;">${esc(sc||'-')}</th>`).join('');
+  tbody.innerHTML = students.map(s=>`<tr>
+    <td style="font-weight:700; white-space:nowrap;">${esc(s.name)}</td>
+    ${scopes.map((sc,i)=> meta.type==='score'
+      ? `<td class="vsel-cell"><input type="number" min="0" max="100" class="be-cell" data-stu="${s.id}" data-i="${i}" placeholder="0~100" oninput="validateScoreInput(this)"></td>`
+      : `<td class="vsel-cell"><select class="vsel be-cell" data-stu="${s.id}" data-i="${i}"><option value="">-</option><option value="true">통과</option><option value="false">미통과</option></select></td>`
+    ).join('')}
+  </tr>`).join('') || '<tr><td><div class="empty-state">학생이 없어요</div></td></tr>';
+}
+
+async function saveBulkExam(){
+  const cls = document.getElementById('be-class').value;
+  const ek  = document.getElementById('be-exam').value;
+  const date = document.getElementById('be-date').value;
+  if(!cls || !ek || !date){ toast('반·시험 종류·날짜를 선택해주세요', true); return; }
+  const meta = EXAM_META[ek];
+  const scopes = window._bulkScopes;
+  const rows = [];
+  document.querySelectorAll('.be-cell').forEach(el=>{
+    const v = el.value;
+    if(v==='' || v==null) return;
+    const scope = (scopes[Number(el.dataset.i)]||'').trim();
+    if(meta.type==='score'){
+      const n = Number(v);
+      if(isNaN(n) || n<0 || n>100) return;
+      rows.push({ studentId:el.dataset.stu, scope, score:n, passed:null });
+    } else {
+      rows.push({ studentId:el.dataset.stu, scope, score:null, passed: v==='true' });
+    }
+  });
+  if(!rows.length){ toast('입력된 점수가 없어요', true); return; }
+  if(!confirm(`${classLabel(cls)}반 · ${meta.name}\n${date}\n\n${rows.length}건을 저장할까요?`)) return;
+  const now = new Date().toISOString();
+  rows.forEach(r=> DB.examRecords.unshift({ id:uid('exam'), studentId:r.studentId, examType:ek, date,
+    scope:r.scope, score:r.score, passed:r.passed, teacher: currentTeacherLabel(), updatedAt: now }));
+  const ok = await saveDB();
+  if(ok){
+    toast(`${rows.length}건을 저장했어요`);
+    document.querySelectorAll('.be-cell').forEach(el=> el.value='');
+    drawExamTable();
+  }
+}
+
+function onExamClassChange(){
+  const cls = document.getElementById('ei-class').value;
+  const stuSel = document.getElementById('ei-student');
+  const examSel = document.getElementById('ei-exam');
+  if(!cls){ stuSel.innerHTML='<option value="">먼저 반을 선택하세요</option>'; examSel.innerHTML='<option value="">먼저 학생을 선택하세요</option>'; document.getElementById('ei-value-field').innerHTML=''; return; }
+  const students = DB.students.filter(s=>s.className===cls && (s.status||'재원')==='재원');
+  stuSel.innerHTML = students.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('') || '<option value="">학생 없음</option>';
+  onExamStudentChange();
+  stuSel.onchange = onExamStudentChange;
+}
+function onExamStudentChange(){
+  const cls = document.getElementById('ei-class').value;
+  const examSel = document.getElementById('ei-exam');
+  examSel.innerHTML = CLASS_EXAMS[cls].map(ek=>`<option value="${ek}">${EXAM_META[ek].name} (${EXAM_META[ek].cycle})</option>`).join('');
+  onExamTypeChange();
+  examSel.onchange = onExamTypeChange;
+}
+function onExamTypeChange(){
+  const ek = document.getElementById('ei-exam').value;
+  const meta = EXAM_META[ek];
+  const box = document.getElementById('ei-value-field');
+  if(!meta){ box.innerHTML=''; return; }
+  if(meta.type==='score'){
+    box.innerHTML = `<div class="field"><label>점수 (기준 ${getExamThreshold(ek)}점)</label><input type="number" id="ei-score" min="0" max="100" placeholder="0~100" oninput="validateScoreInput(this)"></div>`;
+  } else if(meta.type==='pass'){
+    box.innerHTML = `<div class="field"><label>통과 여부</label>
+      <div class="status-btns"><button type="button" class="status-btn" data-v="true" onclick="pickPass(this,true)">통과</button><button type="button" class="status-btn" data-v="false" onclick="pickPass(this,false)">미통과</button></div></div>`;
+  } else if(meta.type==='level'){
+    box.innerHTML = `<div class="field"><label>이번 진도 통과 여부</label>
+      <div class="status-btns"><button type="button" class="status-btn" data-v="true" onclick="pickPass(this,true)">레벨 통과</button><button type="button" class="status-btn" data-v="false" onclick="pickPass(this,false)">미통과</button></div></div>`;
+  }
+}
+function pickPass(el, val){
+  el.parentElement.querySelectorAll('.status-btn').forEach(b=>b.classList.remove('sel-ok','sel-bad'));
+  el.classList.add(val ? 'sel-ok':'sel-bad');
+  el.parentElement.dataset.val = val;
+}
+
+function validateScoreInput(el){
+  const v = Number(el.value);
+  const invalid = el.value!=='' && (isNaN(v) || v<0 || v>100);
+  el.style.borderColor = invalid ? 'var(--red)' : '';
+  el.style.boxShadow = invalid ? '0 0 0 3px var(--red-bg)' : '';
+}
+
+async function addExamRecord(){
+  const studentId = document.getElementById('ei-student').value;
+  const examType = document.getElementById('ei-exam').value;
+  const date = document.getElementById('ei-date').value;
+  if(!studentId || !examType || !date){ toast('반/학생/시험/날짜를 모두 선택해주세요', true); return; }
+  const meta = EXAM_META[examType];
+  let score=null, passed=null;
+  if(meta.type==='score'){
+    const rawVal = document.getElementById('ei-score').value;
+    if(rawVal===''){ toast('점수를 입력해주세요', true); return; }
+    score = Number(rawVal);
+    if(isNaN(score)){ toast('점수는 숫자로 입력해주세요', true); return; }
+    if(score<0 || score>100){ toast('점수는 0~100 사이여야 해요. 다시 확인해주세요.', true); return; }
+  } else {
+    const btnsWrap = document.querySelector('#ei-value-field .status-btns');
+    if(!btnsWrap.dataset.val){ toast('통과 여부를 선택해주세요', true); return; }
+    passed = btnsWrap.dataset.val==='true';
+  }
+  DB.examRecords.unshift({ id:uid('exam'), studentId, examType, date, score, passed, teacher: currentTeacherLabel(), updatedAt: new Date().toISOString() });
+  const ok = await saveDB();
+  if(ok) toast('시험 기록을 저장했어요');
+  drawExamTable();
+}
+
+function drawExamTable(){
+  const tbody = document.getElementById('ei-tbody');
+  const rows = DB.examRecords.slice(0,40);
+  if(rows.length===0){ tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">아직 입력된 시험 기록이 없어요</div></td></tr>`; return; }
+  tbody.innerHTML = rows.map(r=>{
+    const s = studentById(r.studentId);
+    if(!s) return '';
+    const meta = EXAM_META[r.examType];
+    const result = meta.type==='score' ? `${r.score}점` : (r.passed? '통과':'미통과');
+    const pillClass = meta.type==='score' ? (r.score<getExamThreshold(r.examType)?'pill-bad':'pill-ok') : (r.passed?'pill-ok':'pill-bad');
+    return `<tr>
+      <td class="muted">${r.date}</td>
+      <td style="font-weight:700;">${esc(s.name)}</td>
+      <td><span class="badge badge-class">${classLabel(s.className)}</span></td>
+      <td>${meta.name}${r.scope?`<span class="muted" style="font-size:11.5px;"> · ${esc(r.scope)}</span>`:''}</td>
+      <td><span class="pill ${pillClass}">${result}</span></td>
+      <td class="muted">${esc(r.teacher)}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="deleteExamRecord('${r.id}')">삭제</button></td>
+    </tr>`;
+  }).join('');
+}
+async function deleteExamRecord(id){
+  DB.examRecords = DB.examRecords.filter(r=>r.id!==id);
+  const ok = await saveDB();
+  drawExamTable();
+  if(ok) toast('삭제했어요');
+}
+
+/* ---------------------- 11. 쓰기숙제 체크 ---------------------- */
+
+function renderHomeworkWriting(root){
+  root.innerHTML = `
+    <div class="card">
+      <div class="card-header">
+        <div><h3>쓰기숙제 체크</h3><div class="hint">반마다 숙제 항목을 자유롭게 만들 수 있어요 — [숙제 항목 편집]</div></div>
+        <input type="date" id="hw-w-date" value="${fmtDate(new Date())}" onchange="drawWritingTable()" style="padding:8px 12px; border-radius:9px; border:1px solid var(--paper-line);">
+      </div>
+      <div class="card-pad">
+        <div id="hw-w-holiday-banner"></div>
+        <div class="toolbar">
+          <select id="hw-w-class" onchange="drawWritingTable()" style="padding:8px 12px; border-radius:9px; border:1px solid var(--paper-line); font-size:13px;">
+            <option value="">전체 반</option>
+            ${CLASSES.map(c=>`<option value="${c}">${classLabel(c)}</option>`).join('')}
+          </select>
+          <label class="chip-filter" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+            <input type="checkbox" id="hw-w-onlyunchecked" onchange="drawWritingTable()" style="margin:0;"> 미체크만 보기
+          </label>
+          <button class="btn btn-ghost btn-sm" onclick="bulkMarkWriting()" title="미체크 학생을 한 번에 '제출완료'로 처리합니다">
+            <svg viewBox="0 0 24 24" fill="none" width="14" height="14"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            미체크 전체 제출완료 처리</button>
+          <button class="btn btn-ghost btn-sm" onclick="openWritingSlotEditor()" title="이 반의 쓰기숙제 항목을 자유롭게 추가·수정합니다">✎ 숙제 항목 편집</button>
+          <div style="flex:1"></div>
+          <div id="hw-w-counter"></div>
+        </div>
+        <div class="legend" style="margin-bottom:12px;">
+          <div class="item"><span class="dot" style="background:var(--green)"></span>제출완료</div>
+          <div class="item"><span class="dot" style="background:var(--amber)"></span>완성도미흡 · 현장보완</div>
+          <div class="item"><span class="dot" style="background:var(--red)"></span>미제출</div>
+          <div class="item"><span class="dot" style="background:#8496ac"></span>PASS (사유 있음 · 집계 제외)</div>
+          <div class="item"><span class="dot" style="background:#c9c3b3"></span>미체크</div>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr id="hw-w-thead"></tr></thead><tbody id="hw-w-tbody"></tbody></table>
+        </div>
+      </div>
+    </div>
+  `;
+  drawWritingTable();
+}
+
+/* 반마다 쓰기숙제 항목을 자유롭게 둘 수 있습니다.
+   예) A반은 '일기','독후감' 2개 / B반은 '워크북' 1개
+   설정이 없으면 기본 항목 하나('쓰기숙제')만 씁니다. */
+function getWritingSlots(cls){
+  const m = (DB.settings && DB.settings.writingSlots) || {};
+  const arr = m[cls];
+  return (Array.isArray(arr) && arr.length) ? arr.slice() : ['쓰기숙제'];
+}
+// 예전에 저장된 기록에는 slot이 없습니다 → 그 반의 첫 번째 항목으로 봅니다
+function findWritingRec(studentId, date, slot, isFirst){
+  return DB.homeworkRecords.find(r=> r.studentId===studentId && r.type==='writing' && r.date===date
+    && ((r.slot||'')===slot || (isFirst && !r.slot)));
+}
+
+function drawWritingTable(){
+  const date = document.getElementById('hw-w-date').value;
+  const cls = document.getElementById('hw-w-class').value;
+  const onlyUnchecked = document.getElementById('hw-w-onlyunchecked').checked;
+  let students = DB.students.filter(s=> (!cls || s.className===cls) && ((s.status||'재원')==='재원'))
+    .sort((a,b)=>a.className.localeCompare(b.className)||a.name.localeCompare(b.name));
+
+  const holiday = holidayInfo(date);
+  const banner = document.getElementById('hw-w-holiday-banner');
+  banner.innerHTML = holiday
+    ? `<div class="pill pill-mute" style="display:block; padding:10px 14px; margin-bottom:14px; font-size:13px;">📅 오늘은 휴무일이에요 — ${esc(holiday.label||'사유 없음')} · <button class="btn btn-ghost btn-sm" style="padding:2px 8px;" onclick="removeHoliday('${date}'); drawWritingTable();">휴무일 해제</button></div>`
+    : `<div class="no-print" style="margin-bottom:14px;"><button class="btn btn-ghost btn-sm" onclick="quickAddHoliday('${date}', drawWritingTable)">📅 이 날을 휴무일로 등록</button></div>`;
+
+  // 화면에 세울 항목 열 — 반을 고르면 그 반 항목, 전체면 모든 반 항목을 합칩니다
+  const slotCols = cls ? getWritingSlots(cls)
+    : Array.from(new Set(students.reduce((acc,s)=> acc.concat(getWritingSlots(s.className)), [])));
+  const missingOf = (s)=>{
+    const mine = getWritingSlots(s.className);
+    return mine.filter((sl,i)=> !findWritingRec(s.id, date, sl, i===0)).length;
+  };
+
+  document.getElementById('hw-w-thead').innerHTML =
+    `<th>이름</th><th>반</th>` +
+    slotCols.map(sl=>{
+      const un = students.filter(s=>{
+        const mine = getWritingSlots(s.className);
+        const i = mine.indexOf(sl);
+        return i>=0 && !findWritingRec(s.id, date, sl, i===0);
+      }).length;
+      return `<th style="text-align:center; min-width:112px;"><div class="video-chapter-head"><span>${esc(sl)}</span><span class="cnt ${un===0&&students.length>0?'done':''}">${students.length===0?'':(un===0?'완료':un+'명 미체크')}</span></div></th>`;
+    }).join('') + `<th>마지막 체크</th>`;
+
+  const counterEl = document.getElementById('hw-w-counter');
+  if(holiday){
+    counterEl.innerHTML = `<span class="pill pill-mute">휴무일 · 체크 불필요</span>`;
+  } else {
+    const n = students.filter(s=>missingOf(s)>0).length;
+    counterEl.innerHTML = students.length===0 ? '' : (n>0
+      ? `<span class="pill pill-warn">미체크 남은 학생 ${n}명</span>`
+      : `<span class="pill pill-ok">전원 체크 완료</span>`);
+  }
+
+  if(onlyUnchecked) students = students.filter(s=>missingOf(s)>0);
+
+  const tbody = document.getElementById('hw-w-tbody');
+  tbody.innerHTML = students.map(s=>{
+    const mine = getWritingSlots(s.className);
+    const missing = missingOf(s);
+    let last = null;
+    mine.forEach((sl,i)=>{ const r = findWritingRec(s.id,date,sl,i===0);
+      if(r && (!last || (r.updatedAt||'') > (last.updatedAt||''))) last = r; });
+    return `<tr ${missing>0?'style="background:#fbf7ec;"':''}>
+      <td style="font-weight:700; white-space:nowrap;">${esc(s.name)} ${s.notes?`<span title="${esc(s.notes)}" style="cursor:help;">📌</span>`:''} ${missing>0?`<span class="pill pill-mute" style="margin-left:6px;">미체크 ${missing}</span>`:''}</td>
+      <td><span class="badge badge-class">${classLabel(s.className)}</span></td>
+      ${slotCols.map(sl=>{
+        const i = mine.indexOf(sl);
+        if(i<0) return `<td class="vsel-cell muted" style="text-align:center;">—</td>`;
+        const rec = findWritingRec(s.id, date, sl, i===0);
+        const cur = rec ? rec.status : '';
+        const title = rec ? `${esc(rec.teacher||'')} · ${relativeTime(rec.updatedAt)}` : '아직 체크 안 함';
+        return `<td class="vsel-cell">
+          <select class="vsel ${writingSelectClass(cur)}" title="${title}" onchange="setWritingStatus('${s.id}','${date}','${esc(sl)}',this.value)">
+            <option value="" ${!cur?'selected':''}>미체크</option>
+            ${WRITING_STATUS.map(st=>`<option value="${st}" ${cur===st?'selected':''}>${st}</option>`).join('')}
+          </select>
+        </td>`;
+      }).join('')}
+      <td class="muted" style="font-size:11.5px; white-space:nowrap;">${last? `${isRecent(last.updatedAt,10)?'<span style="color:var(--brass); font-weight:700;">● </span>':''}${esc(last.teacher||'')} · ${relativeTime(last.updatedAt)}` : ''}</td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="${3+slotCols.length}"><div class="empty-state">${onlyUnchecked? '미체크 학생이 없어요 🎉':'학생이 없어요'}</div></td></tr>`;
+}
+
+function writingSelectClass(status){
+  if(status==='제출완료') return 'vsel-ok';
+  if(status==='PASS') return 'vsel-pass';
+  if(status==='현장보완' || status==='완성도미흡') return 'vsel-warn';
+  if(status) return 'vsel-bad';
+  return '';
+}
+
+async function setWritingStatus(studentId, date, slot, status){
+  const stu = DB.students.find(x=>x.id===studentId);
+  const mine = getWritingSlots(stu ? stu.className : '');
+  const isFirst = mine[0]===slot;
+  if(!status){
+    DB.homeworkRecords = DB.homeworkRecords.filter(r=> !(r.studentId===studentId && r.type==='writing' && r.date===date && ((r.slot||'')===slot || (isFirst && !r.slot))));
+  } else {
+    let rec = findWritingRec(studentId, date, slot, isFirst);
+    const now = new Date().toISOString();
+    if(rec){ rec.slot = slot; rec.status = status; rec.teacher = currentTeacherLabel(); rec.updatedAt = now; }
+    else { DB.homeworkRecords.push({ id:uid('hw'), studentId, type:'writing', slot, date, status, teacher: currentTeacherLabel(), updatedAt: now }); }
+  }
+  const ok = await saveDB();
+  drawWritingTable();
+  if(ok) toast('저장했어요');
+}
+
+async function bulkMarkWriting(){
+  const date = document.getElementById('hw-w-date').value;
+  const cls = document.getElementById('hw-w-class').value;
+  const students = DB.students.filter(s=> (!cls || s.className===cls) && (s.status||'재원')==='재원');
+  const targets = [];
+  students.forEach(s=>{
+    getWritingSlots(s.className).forEach((sl,i)=>{
+      if(!findWritingRec(s.id, date, sl, i===0)) targets.push({studentId:s.id, slot:sl});
+    });
+  });
+  if(targets.length===0){ toast('이미 전부 체크되어 있어요'); return; }
+  if(!confirm(`${cls?cls+'반 ':'전체 반 '}미체크 ${targets.length}건을 모두 '제출완료'로 처리할까요?\n이미 체크된 항목은 그대로 유지됩니다.`)) return;
+  const now = new Date().toISOString();
+  targets.forEach(t=> DB.homeworkRecords.push({ id:uid('hw'), studentId:t.studentId, type:'writing', slot:t.slot, date, status:'제출완료', teacher: currentTeacherLabel(), updatedAt: now }));
+  const ok = await saveDB();
+  drawWritingTable();
+  if(ok) toast(`${targets.length}건을 제출완료로 일괄 처리했어요`);
+}
+
+/* ── 반별 쓰기숙제 항목 편집 ── */
+function openWritingSlotEditor(){
+  const cls = document.getElementById('hw-w-class').value;
+  if(!cls){ toast('먼저 반을 선택해주세요', true); return; }
+  window._slotEdit = { cls, before: getWritingSlots(cls), list: getWritingSlots(cls) };
+  openModal(`
+    <div class="modal-head"><h3>${classLabel(cls)}반 쓰기숙제 항목</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="muted" style="font-size:12px; margin-bottom:12px;">이 반에서 내주는 쓰기숙제 종류를 적어주세요. 개수는 자유입니다.<br>예) 일기 / 독후감 / 워크북</div>
+      <div id="slot-rows"></div>
+      <button class="btn btn-ghost btn-sm" onclick="addSlotRow()" style="margin-top:8px;">+ 항목 추가</button>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal()">취소</button>
+      <button class="btn btn-brass" onclick="saveWritingSlots()">저장</button>
+    </div>
+  `);
+  drawSlotRows();
+}
+function drawSlotRows(){
+  const L = window._slotEdit.list;
+  document.getElementById('slot-rows').innerHTML = L.map((v,i)=>`
+    <div style="display:flex; gap:8px; margin-bottom:8px; align-items:center;">
+      <input type="text" value="${esc(v)}" oninput="window._slotEdit.list[${i}]=this.value"
+             style="flex:1; padding:9px 11px; border-radius:9px; border:1px solid var(--paper-line); font-family:inherit;">
+      ${L.length>1?`<button class="btn btn-ghost btn-sm" onclick="removeSlotRow(${i})">삭제</button>`:''}
+    </div>`).join('');
+}
+function addSlotRow(){ window._slotEdit.list.push(''); drawSlotRows(); }
+function removeSlotRow(i){ window._slotEdit.list.splice(i,1); drawSlotRows(); }
+async function saveWritingSlots(){
+  const E = window._slotEdit;
+  const list = E.list.map(v=>String(v||'').trim()).filter(v=>v);
+  if(!list.length){ toast('항목을 하나 이상 남겨주세요', true); return; }
+  if(new Set(list).size !== list.length){ toast('같은 이름의 항목이 있어요', true); return; }
+  // 이름을 바꾼 항목은 기존 기록도 같이 옮겨줍니다 (기록이 사라지지 않도록)
+  let moved = 0;
+  E.before.forEach((oldName, i)=>{
+    const newName = list[i];
+    if(!newName || newName===oldName) return;
+    DB.homeworkRecords.forEach(r=>{
+      if(r.type==='writing' && ((r.slot||'')===oldName || (i===0 && !r.slot))){
+        const stu = DB.students.find(x=>x.id===r.studentId);
+        if(stu && stu.className===E.cls){ r.slot = newName; moved++; }
+      }
+    });
+  });
+  const dropped = E.before.filter(b=> !list.includes(b));
+  if(dropped.length && !confirm(`'${dropped.join(", ")}' 항목을 없앱니다.\n그동안 쌓인 기록은 지워지지 않지만 화면에서 보이지 않게 됩니다.\n계속할까요?`)) return;
+  if(!DB.settings.writingSlots) DB.settings.writingSlots = {};
+  DB.settings.writingSlots[E.cls] = list;
+  const ok = await saveDB();
+  closeModal();
+  drawWritingTable();
+  if(ok) toast(moved ? `항목을 저장했어요 (기록 ${moved}건도 함께 옮겼어요)` : '항목을 저장했어요');
+}
+
+/* ---------------------- 11-2. 휴무일 관리 ---------------------- */
+
+function quickAddHoliday(date, redrawFn){
+  window._holidayRedraw = redrawFn;
+  openModal(`
+    <div class="modal-head"><h3>휴무일로 등록</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label>날짜</label><input value="${date}" disabled></div>
+      <div class="field"><label>사유 (선택)</label><input id="holiday-label-input" placeholder="예: 설날 연휴, 여름방학, 임시휴원"></div>
+      <div class="muted" style="font-size:11.5px;">휴무일로 등록하면 이 날짜는 미체크 카운터·경고에서 제외돼요.</div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal()">취소</button>
+      <button class="btn btn-primary" onclick="confirmQuickHoliday('${date}')">등록</button>
+    </div>
+  `);
+}
+async function confirmQuickHoliday(date){
+  const label = document.getElementById('holiday-label-input').value.trim();
+  const existing = DB.holidays.find(h=>h.date===date);
+  if(existing) existing.label = label;
+  else DB.holidays.push({date, label});
+  const ok = await saveDB();
+  closeModal();
+  if(ok) toast('휴무일로 등록했어요');
+  if(window._holidayRedraw) window._holidayRedraw();
+}
+async function removeHoliday(date){
+  DB.holidays = DB.holidays.filter(h=>h.date!==date);
+  await saveDB();
+  toast('휴무일을 해제했어요');
+}
+
+async function saveRolePins(){
+  DB.settings.rolePins = {
+    director: document.getElementById('pin-director').value.trim(),
+    exam_teacher: document.getElementById('pin-exam_teacher').value.trim(),
+    video_teacher: document.getElementById('pin-video_teacher').value.trim(),
+  };
+  const ok = await saveDB();
+  if(ok) toast('역할 잠금 설정을 저장했어요');
+}
+
+async function addHolidayFromSettings(){
+  const date = document.getElementById('hol-date').value;
+  const label = document.getElementById('hol-label').value.trim();
+  if(!date){ toast('날짜를 선택해주세요', true); return; }
+  const existing = DB.holidays.find(h=>h.date===date);
+  if(existing) existing.label = label;
+  else DB.holidays.push({date, label});
+  const ok = await saveDB();
+  if(ok) toast('휴무일을 추가했어요');
+  renderSettings(document.getElementById('view-inner'));
+}
+async function removeHolidayFromSettings(date){
+  DB.holidays = DB.holidays.filter(h=>h.date!==date);
+  const ok = await saveDB();
+  if(ok) toast('휴무일을 삭제했어요');
+  renderSettings(document.getElementById('view-inner'));
+}
+
+/* ---------------------- 12. 영상숙제 체크 ---------------------- */
+
+function renderHomeworkVideo(root){
+  const videoClasses = CLASSES.filter(c=>CLASS_HAS_VIDEO.includes(c));
+  root.innerHTML = `
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-header">
+        <div><h3>영상숙제 체크</h3><div class="hint">한 화면에서 ERC · 단어 · 알파 · 독서감상 · 일기를 모두 체크하세요 — 챕터별로 화면을 옮길 필요 없이, 학생 줄에서 바로 클릭하면 됩니다</div></div>
+        <input type="date" id="hw-v-date" value="${fmtDate(new Date())}" onchange="drawVideoTable()" style="padding:8px 12px; border-radius:9px; border:1px solid var(--paper-line);">
+      </div>
+      <div class="card-pad">
+        <div id="hw-v-holiday-banner"></div>
+        <div class="toolbar">
+          <select id="hw-v-class" onchange="drawVideoTable()" style="padding:8px 12px; border-radius:9px; border:1px solid var(--paper-line); font-size:13px;">
+            <option value="">전체 반</option>
+            ${videoClasses.map(c=>`<option value="${c}">${classLabel(c)}${CLASS_TIME[c]?` (${CLASS_TIME[c]})`:''}</option>`).join('')}
+          </select>
+          <label class="chip-filter" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+            <input type="checkbox" id="hw-v-onlyunchecked" onchange="drawVideoTable()" style="margin:0;"> 미체크 남은 학생만 보기
+          </label>
+          <button class="btn btn-ghost btn-sm" onclick="bulkMarkVideo()" title="5개 챕터 중 아직 체크 안 된 항목을 한 번에 '정상제출'로 처리합니다">
+            <svg viewBox="0 0 24 24" fill="none" width="14" height="14"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            미체크 전체 정상제출 처리</button>
+          <div style="flex:1"></div>
+          <div id="hw-v-counter"></div>
+        </div>
+        <div class="table-wrap">
+          <table><thead>
+            <tr><th rowspan="2">이름</th><th rowspan="2">반</th><th colspan="${VIDEO_TYPES.length}" style="text-align:center;">챕터 (눌러서 바로 체크)</th></tr>
+            <tr id="hw-v-thead-chapters"></tr>
+          </thead><tbody id="hw-v-tbody"></tbody></table>
+        </div>
+        <div class="muted" style="font-size:11px; margin-top:10px;">※ 셀을 눌러 상태를 바로 선택하세요. "미체크"를 다시 선택하면 체크를 취소할 수 있어요.</div>
+      </div>
+    </div>
+    <div class="card" id="hw-v-notecard">
+      <div class="card-header"><h3>이번 주 비고</h3><div class="hint">자세 불량, 중복 업로드, 파일 오류 등 특이사항을 자유롭게 기록하세요 (검사지의 메모란과 동일)</div></div>
+      <div class="card-pad">
+        <textarea id="hw-v-note" rows="4" placeholder="예: 서율 - 알파영상 2개 중 1개만 업로드. 하윤 - 영상숙제 중 딴짓, 집중 못함." onchange="saveVideoNote()"></textarea>
+        <div class="muted" style="font-size:11.5px; margin-top:6px;" id="hw-v-note-scope"></div>
+      </div>
+    </div>
+  `;
+  drawVideoTable();
+}
+
+function videoSelectClass(status){
+  if(!status) return 'vsel-none';
+  if(status==='정상제출') return 'vsel-ok';
+  if(status==='PASS') return 'vsel-pass';
+  if(status==='현장보완') return 'vsel-warn';
+  return 'vsel-bad';
+}
+
+function drawVideoTable(){
+  const date = document.getElementById('hw-v-date').value;
+  const cls = document.getElementById('hw-v-class').value;
+  const onlyUnchecked = document.getElementById('hw-v-onlyunchecked').checked;
+  let students = DB.students.filter(s=> (!cls || s.className===cls) && ((s.status||'재원')==='재원')).sort((a,b)=>a.className.localeCompare(b.className)||a.name.localeCompare(b.name));
+
+  const holiday = holidayInfo(date);
+  const banner = document.getElementById('hw-v-holiday-banner');
+  banner.innerHTML = holiday
+    ? `<div class="pill pill-mute" style="display:block; padding:10px 14px; margin-bottom:14px; font-size:13px;">📅 오늘은 휴무일이에요 — ${esc(holiday.label||'사유 없음')} · <button class="btn btn-ghost btn-sm" style="padding:2px 8px;" onclick="removeHoliday('${date}'); drawVideoTable();">휴무일 해제</button></div>`
+    : `<div class="no-print" style="margin-bottom:14px;"><button class="btn btn-ghost btn-sm" onclick="quickAddHoliday('${date}', drawVideoTable)">📅 이 날을 휴무일로 등록</button></div>`;
+
+  // 챕터별 헤더 (미체크 인원 표시)
+  const theadEl = document.getElementById('hw-v-thead-chapters');
+  theadEl.innerHTML = VIDEO_TYPES.map(v=>{
+    const unchecked = students.filter(s=> !DB.homeworkRecords.find(r=>r.studentId===s.id && r.type===v.key && r.date===date)).length;
+    return `<th style="text-align:center;"><div class="video-chapter-head"><span>${v.name}${v.key==='video_report'?'<span class="muted" style="font-weight:600;"> (편수)</span>':''}</span><span class="cnt ${unchecked===0 && students.length>0?'done':''}">${students.length===0?'':(unchecked===0?'완료':unchecked+'명 미체크')}</span></div></th>`;
+  }).join('') + `<th style="text-align:left; min-width:150px;"><div class="video-chapter-head"><span>학생별 코멘트</span><span class="cnt">개별 메모</span></div></th>`;
+
+  const recordOf = (studentId, type)=> DB.homeworkRecords.find(r=>r.studentId===studentId && r.type===type && r.date===date);
+  const missingCountFor = (s)=> VIDEO_TYPES.filter(v=>!recordOf(s.id, v.key)).length;
+
+  const counterEl = document.getElementById('hw-v-counter');
+  if(holiday){
+    counterEl.innerHTML = `<span class="pill pill-mute">휴무일 · 체크 불필요</span>`;
+  } else {
+    const studentsWithMissing = students.filter(s=>missingCountFor(s)>0).length;
+    counterEl.innerHTML = students.length===0 ? '' : (studentsWithMissing>0
+      ? `<span class="pill pill-warn">미체크 항목 남은 학생 ${studentsWithMissing}명</span>`
+      : `<span class="pill pill-ok">전원 ${VIDEO_TYPES.length}개 항목 체크 완료</span>`);
+  }
+
+  if(onlyUnchecked){
+    students = students.filter(s=>missingCountFor(s)>0);
+  }
+
+  const tbody = document.getElementById('hw-v-tbody');
+  tbody.innerHTML = students.map(s=>{
+    const missing = missingCountFor(s);
+    return `<tr ${missing>0?'style="background:#fbf7ec;"':''}>
+      <td style="font-weight:700; white-space:nowrap;">${esc(s.name)} ${s.notes?`<span title="${esc(s.notes)}" style="cursor:help;">📌</span>`:''} ${missing>0?`<span class="pill pill-mute" style="margin-left:6px;">미체크 ${missing}</span>`:''}</td>
+      <td><span class="badge badge-class">${classLabel(s.className)}</span></td>
+      ${VIDEO_TYPES.map(v=>{
+        const rec = recordOf(s.id, v.key);
+        const cur = rec ? rec.status : '';
+        const title = rec ? `${esc(rec.teacher||'')} · ${relativeTime(rec.updatedAt)}` : '아직 체크 안 함';
+        const countBox = (v.key==='video_report')
+          ? `<input type="number" min="1" max="20" class="vcount" value="${rec && rec.count ? rec.count : ''}" placeholder="편수"
+               ${!cur?'disabled':''} title="독서감상문을 몇 편 냈는지 적으세요"
+               onchange="setVideoCount('${s.id}','${date}','${v.key}',this.value)">`
+          : '';
+        return `<td class="vsel-cell">
+          <select class="vsel ${videoSelectClass(cur)}" title="${title}" onchange="setVideoStatus('${s.id}','${date}','${v.key}',this.value)">
+            <option value="" ${!cur?'selected':''}>미체크</option>
+            ${VIDEO_STATUS.map(st=>`<option value="${st}" ${cur===st?'selected':''}>${st}</option>`).join('')}
+          </select>${countBox}
+        </td>`;
+      }).join('')}
+      <td><input type="text" class="vcomment" value="${esc(DB.videoComments[s.id+'::'+date]||'')}" placeholder="이 학생에게 남길 메모"
+            onchange="saveStudentComment('${s.id}','${date}',this.value)"></td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="${3+VIDEO_TYPES.length}"><div class="empty-state">${onlyUnchecked? '미체크 학생이 없어요 🎉':'학생이 없어요'}</div></td></tr>`;
+
+  // 비고는 반 단위로 남기는 메모라, 반을 선택했을 때만 활성화됩니다
+  const weekKey = getWeekKey(date);
+  const noteBox = document.getElementById('hw-v-note');
+  const scopeLabel = document.getElementById('hw-v-note-scope');
+  if(!cls){
+    noteBox.value=''; noteBox.disabled = true; noteBox.placeholder='특정 반을 선택하면 그 반의 비고를 남길 수 있어요';
+    scopeLabel.textContent = '반을 선택해주세요';
+    noteBox.dataset.key='';
+  } else {
+    noteBox.disabled = false;
+    noteBox.placeholder = '예: 서율 - 알파영상 2개 중 1개만 업로드. 하윤 - 영상숙제 중 딴짓, 집중 못함.';
+    const key = cls+'::'+weekKey;
+    noteBox.value = DB.videoNotes[key] || '';
+    noteBox.dataset.key = key;
+    scopeLabel.textContent = `${classLabel(cls)} · ${weekKey} 비고`;
+  }
+}
+
+async function setVideoStatus(studentId, date, type, status){
+  if(!status){
+    // "미체크"를 다시 선택하면 체크를 취소합니다
+    DB.homeworkRecords = DB.homeworkRecords.filter(r=> !(r.studentId===studentId && r.type===type && r.date===date));
+  } else {
+    let rec = DB.homeworkRecords.find(r=>r.studentId===studentId && r.type===type && r.date===date);
+    const now = new Date().toISOString();
+    if(rec){ rec.status = status; rec.teacher = currentTeacherLabel(); rec.updatedAt = now; }
+    else { DB.homeworkRecords.push({ id:uid('hw'), studentId, type, date, status, teacher: currentTeacherLabel(), updatedAt: now }); }
+  }
+  const ok = await saveDB();
+  drawVideoTable();
+  if(ok) toast('저장했어요');
+}
+
+// 독서감상문 편수 (1편 이상 낸 학생용)
+async function setVideoCount(studentId, date, type, value){
+  const rec = DB.homeworkRecords.find(r=>r.studentId===studentId && r.type===type && r.date===date);
+  if(!rec){ toast('먼저 상태를 선택해주세요', true); return; }
+  const n = parseInt(value, 10);
+  if(value==='' || isNaN(n)) delete rec.count; else rec.count = Math.max(1, Math.min(20, n));
+  rec.updatedAt = new Date().toISOString();
+  rec.teacher = currentTeacherLabel();
+  const ok = await saveDB();
+  drawVideoTable();
+  if(ok) toast(rec.count ? ('독서감상문 ' + rec.count + '편으로 기록했어요') : '편수를 지웠어요');
+}
+
+// 학생 한 명에게만 남기는 코멘트 (반 전체 비고와 별개)
+async function saveStudentComment(studentId, date, text){
+  const key = studentId + '::' + date;
+  if(text && text.trim()) DB.videoComments[key] = text.trim();
+  else delete DB.videoComments[key];
+  const ok = await saveDB();
+  if(ok) toast('코멘트를 저장했어요');
+}
+
+async function bulkMarkVideo(){
+  const date = document.getElementById('hw-v-date').value;
+  const cls = document.getElementById('hw-v-class').value;
+  const students = DB.students.filter(s=> (!cls || s.className===cls) && ((s.status||'재원')==='재원'));
+  const targets = [];
+  students.forEach(s=>{
+    VIDEO_TYPES.forEach(v=>{
+      if(!DB.homeworkRecords.find(r=>r.studentId===s.id && r.type===v.key && r.date===date)){
+        targets.push({studentId:s.id, type:v.key});
+      }
+    });
+  });
+  if(targets.length===0){ toast('이미 전원 모든 항목이 체크되어 있어요'); return; }
+  if(!confirm(`${cls?cls+'반 ':'전체 반 '}미체크 챕터 ${targets.length}건(학생×챕터)을 모두 '정상제출'로 처리할까요?\n이미 체크된 항목은 그대로 유지됩니다.`)) return;
+  const now = new Date().toISOString();
+  targets.forEach(t=>{
+    DB.homeworkRecords.push({ id:uid('hw'), studentId:t.studentId, type:t.type, date, status:'정상제출', teacher: currentTeacherLabel(), updatedAt: now });
+  });
+  const ok = await saveDB();
+  drawVideoTable();
+  if(ok) toast(`${targets.length}건을 정상제출로 일괄 처리했어요`);
+}
+
+async function saveVideoNote(){
+  const el = document.getElementById('hw-v-note');
+  if(!el.dataset.key) return;
+  DB.videoNotes[el.dataset.key] = el.value;
+  const ok = await saveDB();
+  if(ok) toast('비고를 저장했어요');
+}
+
+/* ---------------------- 13. 보강 대상 관리 ---------------------- */
+
+function renderRemedial(root){
+  const wk = currentWeekKey();
+  const allWithGrade = DB.students.filter(s=>((s.status||'재원')==='재원')).map(s=>({s, g: computeWeeklyGrade(s.id, wk), w: computeWatchFlag(s.id)}));
+  const reds = allWithGrade.filter(x=>x.g.hasAnyRecord && x.g.grade==='red');
+  const watchOnly = allWithGrade.filter(x=> x.w.watch && !(x.g.hasAnyRecord && x.g.grade==='red'));
+
+  root.innerHTML = `
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-pad flex between wrap gap-14">
+        <div>
+          <div class="serif" style="font-size:16px; font-weight:600;">이번 주(${wk}) 위험군(빨강) 학생 ${reds.length}명</div>
+          <div class="muted" style="font-size:12.5px; margin-top:4px;">체크한 학생에게 학부모 문자를 발송할 수 있습니다. 발송 전 내용을 확인·수정하세요.</div>
+        </div>
+        <button class="btn btn-brass" onclick="openBulkSms()">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          선택 학생 문자 발송</button>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header"><h3>보강 대상 명단</h3><div class="hint">보강 내용을 한 줄 메모로 남겨두면, 다음에 같은 학생이 또 위험군에 들어왔을 때 참고할 수 있어요</div></div>
+      <div class="card-pad">
+        ${reds.length===0? `<div class="empty-state">이번 주에는 빨강(위험) 등급 학생이 없어요. 잘 관리되고 있어요.</div>` : `
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th style="width:34px;"><input type="checkbox" id="rem-all" onchange="toggleAllRemedial(this)"></th><th>이름</th><th>반</th><th>사유</th><th>학부모 연락처</th><th>문자</th><th style="min-width:180px;">보강 메모</th><th>보강 완료</th></tr></thead>
+            <tbody id="rem-tbody">
+              ${reds.map(({s,g})=>{
+                const key = s.id+'::'+wk;
+                const rem = DB.remedial[key] || {};
+                const pastCount = Object.keys(DB.remedial).filter(k=> k.startsWith(s.id+'::') && k!==key && (DB.remedial[k].note||DB.remedial[k].done)).length;
+                return `<tr>
+                  <td><input type="checkbox" class="rem-check" value="${s.id}"></td>
+                  <td style="font-weight:700;">${esc(s.name)} ${pastCount? `<button class="btn btn-ghost btn-sm" style="padding:2px 8px; margin-left:2px;" onclick="openPastRemedial('${s.id}')" title="지난 보강 이력 보기">지난이력 ${pastCount}</button>`:''}</td>
+                  <td><span class="badge badge-class">${classLabel(s.className)}</span></td>
+                  <td class="muted" style="max-width:240px; font-size:12.5px;">${esc(g.detail.join(', '))}</td>
+                  <td class="muted">${esc(s.parentPhone||'-')}</td>
+                  <td>${rem.sent? '<span class="pill pill-ok">발송완료</span>' : '<span class="pill pill-mute">미발송</span>'}</td>
+                  <td><input type="text" placeholder="예: 화요일 남아서 단어시험 재시험" value="${esc(rem.note||'')}" style="width:100%; padding:6px 9px; border-radius:7px; border:1px solid #d8d3c4; font-size:12.5px;" onchange="saveRemedialNote('${s.id}','${wk}',this.value)"></td>
+                  <td><input type="checkbox" ${rem.done?'checked':''} onchange="toggleRemedialDone('${s.id}','${wk}',this.checked)"></td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>`}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div><h3>관찰 필요 학생</h3><div class="hint">이번 주는 괜찮아 보여도 최근 ${DB.settings.watchWindowWeeks||3}주 중 ${DB.settings.watchThreshold||2}주 이상 노랑·빨강이었던 학생이에요 — 반복되는 패턴을 놓치지 않도록 따로 모았어요</div></div>
+      </div>
+      <div class="card-pad">
+        ${watchOnly.length===0? `<div class="empty-state">현재 별도로 관찰이 필요한 학생은 없어요</div>` : `
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>이름</th><th>반</th><th>이번 주 상태</th><th>최근 ${DB.settings.watchWindowWeeks||3}주 흐름</th></tr></thead>
+            <tbody>
+              ${watchOnly.map(({s,g,w})=>`
+                <tr>
+                  <td style="font-weight:700;">${esc(s.name)}</td>
+                  <td><span class="badge badge-class">${classLabel(s.className)}</span></td>
+                  <td><div class="seal seal-sm ${gradeSealClass(g.hasAnyRecord?g.grade:'none')}"></div></td>
+                  <td><div class="seal-row">${w.grades.map(gg=>`<div class="seal seal-sm ${gradeSealClass(gg.hasAnyRecord?gg.grade:'none')}" title="${gg.weekKey}"></div>`).join('')}<span class="muted" style="font-size:11.5px; margin-left:6px;">최근 ${w.windowWeeks}주 중 ${w.badCount}주 노랑·빨강</span></div></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>`}
+      </div>
+    </div>
+  `;
+}
+function toggleAllRemedial(el){ document.querySelectorAll('.rem-check').forEach(c=>c.checked=el.checked); }
+async function toggleRemedialDone(studentId, wk, val){
+  const key = studentId+'::'+wk;
+  DB.remedial[key] = Object.assign({}, DB.remedial[key], {done:val});
+  const ok = await saveDB();
+  if(ok) toast(val? '보강 완료로 표시했어요' : '보강 완료를 취소했어요');
+}
+async function saveRemedialNote(studentId, wk, note){
+  const key = studentId+'::'+wk;
+  DB.remedial[key] = Object.assign({}, DB.remedial[key], {note});
+  const ok = await saveDB();
+  if(ok) toast('보강 메모를 저장했어요');
+}
+function openPastRemedial(studentId){
+  const s = studentById(studentId);
+  const entries = Object.keys(DB.remedial)
+    .filter(k=> k.startsWith(studentId+'::'))
+    .map(k=> Object.assign({weekKey: k.split('::')[1]}, DB.remedial[k]))
+    .filter(e=> e.note || e.done || e.sent)
+    .sort((a,b)=> a.weekKey<b.weekKey?1:-1);
+  openModal(`
+    <div class="modal-head"><h3>${esc(s.name)} · 지난 보강 이력</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      ${entries.length===0? `<div class="empty-state">지난 보강 기록이 없어요</div>` : `
+        ${entries.map(e=>`
+          <div class="checklist-row" style="align-items:flex-start;">
+            <div class="seal seal-sm ${e.done?'g':'y'}" style="margin-top:3px; flex-shrink:0;"></div>
+            <div>
+              <div style="font-weight:700; font-size:13px;">${e.weekKey} 주차 ${e.done? '· 보강 완료':''}</div>
+              <div class="muted" style="font-size:12.5px; margin-top:2px;">${e.note? esc(e.note) : '(남긴 메모 없음)'}</div>
+            </div>
+          </div>
+        `).join('')}
+      `}
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">닫기</button></div>
+  `);
+}
+
+function openBulkSms(){
+  const checked = Array.from(document.querySelectorAll('.rem-check:checked')).map(c=>c.value);
+  if(checked.length===0){ toast('문자를 보낼 학생을 먼저 선택해주세요', true); return; }
+  const wk = currentWeekKey();
+
+  // 학부모 연락처가 같은 학생끼리 한 그룹(한 가구)으로 묶어서 문자를 한 통만 보냅니다
+  const groups = {};
+  checked.forEach(id=>{
+    const s = studentById(id);
+    const norm = normalizePhone(s.parentPhone);
+    const key = norm || ('solo_'+id);
+    if(!groups[key]) groups[key] = [];
+    groups[key].push(id);
+  });
+  const groupList = Object.values(groups);
+  const siblingGroupCount = groupList.filter(g=>g.length>1).length;
+
+  const msgs = groupList.map(ids=>{
+    const names = ids.map(id=>studentById(id).name);
+    const lines = ids.map(id=>{
+      const s = studentById(id);
+      const g = computeWeeklyGrade(id, wk);
+      return `· ${s.name}: ${g.detail.join(', ') || '위험군 안내'}`;
+    });
+    const body = `[남쌤 ERC 학원] ${names.join('·')} 학생 이번 주 안내\n${lines.join('\n')}\n가정에서 지도 부탁드립니다.`;
+    return {ids, names, body};
+  });
+
+  openModal(`
+    <div class="modal-head"><h3>학부모 문자 발송 확인</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="muted" style="font-size:12.5px; margin-bottom:14px;">발송 전 내용을 확인·수정할 수 있어요. (데모 환경에서는 실제 SMS 게이트웨이 연동 없이 발송 기록만 저장됩니다)</div>
+      ${siblingGroupCount>0? `<div class="pill pill-watch" style="margin-bottom:14px; display:inline-block;">형제·자매 ${siblingGroupCount}가구는 문자 한 통으로 묶어서 발송돼요</div>` : ''}
+      ${msgs.map((m,i)=>`
+        <div class="field">
+          <label>${esc(m.names.join(' · '))} 학부모 ${m.ids.length>1?'<span class="pill pill-mute" style="margin-left:4px;">형제 묶음</span>':''}</label>
+          <textarea rows="${2+m.ids.length}" id="sms-${i}">${esc(m.body)}</textarea>
+        </div>
+      `).join('')}
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal()">취소</button>
+      <button class="btn btn-brass" onclick='confirmBulkSms(${JSON.stringify(groupList)})'>발송하기</button>
+    </div>
+  `);
+}
+async function confirmBulkSms(groupList){
+  const wk = currentWeekKey();
+  let totalStudents = 0;
+  groupList.forEach((ids,i)=>{
+    const textEl = document.getElementById('sms-'+i);
+    const message = textEl ? textEl.value : '';
+    ids.forEach(id=>{
+      const key = id+'::'+wk;
+      DB.remedial[key] = Object.assign({}, DB.remedial[key], {sent:true, message, sentAt: fmtDate(new Date())});
+      totalStudents++;
+    });
+  });
+  const ok = await saveDB();
+  closeModal();
+  if(ok) toast(`${groupList.length}건 문자 발송 (${totalStudents}명 대상)`);
+  renderRemedial(document.getElementById('view-inner'));
+}
+
+/* ---------------------- 14. 월간 리포트 ---------------------- */
+
+function renderReport(root){
+  const mk = currentMonthKey();
+  root.innerHTML = `
+    <div class="card no-print" style="margin-bottom:20px;">
+      <div class="card-pad flex between wrap gap-14">
+        <div class="field" style="margin:0;">
+          <label>대상 학생</label>
+          <select id="rep-student" onchange="drawReport()">
+            <option value="all">전체 재원 학생</option>
+            ${DB.students.slice().sort((a,b)=>a.className.localeCompare(b.className)).map(s=>`<option value="${s.id}">${classLabel(s.className)} · ${esc(s.name)}${(s.status||'재원')!=='재원'?` (${s.status})`:''}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field" style="margin:0;">
+          <label>대상 월</label>
+          <input type="month" id="rep-month" value="${mk}" onchange="drawReport()">
+        </div>
+        <div class="flex gap-8" style="align-self:flex-end;">
+          <button class="btn btn-brass" onclick="window.print()">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M6 9V3h12v6M6 18H4a1 1 0 0 1-1-1v-5a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-2M6 14h12v7H6v-7Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            PDF/인쇄</button>
+          <button class="btn btn-primary" onclick="openReportSms()">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            문자로 리포트 발송</button>
+        </div>
+      </div>
+    </div>
+    <div id="rep-area"></div>
+  `;
+  drawReport();
+}
+
+function monthlySummary(studentId, monthKey){
+  const exams = DB.examRecords.filter(r=>r.studentId===studentId && getMonthKey(r.date)===monthKey);
+  const hws = DB.homeworkRecords.filter(r=>r.studentId===studentId && getMonthKey(r.date)===monthKey);
+  const examByType = {};
+  exams.forEach(r=>{
+    if(!examByType[r.examType]) examByType[r.examType]=[];
+    examByType[r.examType].push(r);
+  });
+  const writing = hws.filter(r=>r.type==='writing');
+  const wCount = {제출완료:0, PASS:0, 현장보완:0, 미제출:0};
+  writing.forEach(r=>wCount[r.status] = (wCount[r.status]||0)+1);
+  const video = hws.filter(r=>r.type.startsWith('video_'));
+  const vNormal = video.filter(r=>r.status==='정상제출').length;
+  const vPass   = video.filter(r=>r.status==='PASS').length;
+  const vIssue  = video.length - vNormal - vPass;   // PASS는 문제 건수에서 뺍니다
+  // 최근 4주 등급
+  const weeks=[]; for(let i=3;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-7*i); weeks.push(getWeekKey(fmtDate(d))); }
+  const trend = weeks.map(w=>computeWeeklyGrade(studentId,w));
+  return {examByType, wCount, video:{total:video.length, normal:vNormal, pass:vPass, issue:vIssue}, trend};
+}
+
+function drawReport(){
+  const target = document.getElementById('rep-student').value;
+  const mk = document.getElementById('rep-month').value;
+  const students = target==='all' ? DB.students.filter(s=>(s.status||'재원')==='재원').sort((a,b)=>a.className.localeCompare(b.className)||a.name.localeCompare(b.name)) : [studentById(target)];
+  const area = document.getElementById('rep-area');
+  area.innerHTML = students.map(s=>{
+    const sum = monthlySummary(s.id, mk);
+    return `
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-header">
+        <div><h3>${esc(s.name)} <span class="muted" style="font-weight:400; font-size:13px;">· ${classLabel(s.className)} · ${esc(s.school||'학교 미입력')} ${esc(s.grade||'-')}</span></h3><div class="hint">${mk} 월간 리포트</div></div>
+        <div class="seal-row">${sum.trend.map(t=>`<div class="seal seal-sm ${gradeSealClass(t.hasAnyRecord?t.grade:'none')}" title="${t.weekKey}"></div>`).join('')}</div>
+      </div>
+      <div class="card-pad">
+        <div style="font-size:12.5px; font-weight:700; color:var(--text-soft); text-transform:uppercase; letter-spacing:.4px; margin-bottom:10px;">시험 성적</div>
+        <div class="table-wrap" style="margin-bottom:18px;">
+          <table><thead><tr><th>시험</th><th>기록</th></tr></thead><tbody>
+          ${Object.keys(sum.examByType).length? Object.entries(sum.examByType).map(([k,list])=>{
+            const meta = EXAM_META[k];
+            const txt = meta.type==='score' ? list.map(r=>`${r.date.slice(5)} ${r.score}점`).join(', ') : list.map(r=>`${r.date.slice(5)} ${r.passed?'통과':'미통과'}`).join(', ');
+            return `<tr><td style="font-weight:600;">${meta.name}</td><td class="muted">${txt}</td></tr>`;
+          }).join('') : `<tr><td colspan="2" class="muted">이번 달 기록 없음</td></tr>`}
+          </tbody></table>
+        </div>
+        <div style="font-size:12.5px; font-weight:700; color:var(--text-soft); text-transform:uppercase; letter-spacing:.4px; margin-bottom:10px;">숙제 현황</div>
+        <div class="flex gap-14 wrap">
+          <div class="pill pill-ok">쓰기 제출완료 ${sum.wCount['제출완료']||0}회</div>
+          <div class="pill pill-warn">쓰기 현장보완 ${sum.wCount['현장보완']||0}회</div>
+          <div class="pill pill-bad">쓰기 미제출 ${sum.wCount['미제출']||0}회</div>
+          <div class="pill pill-ok">영상 정상제출 ${sum.video.normal}회</div>
+          ${(sum.video.pass||0)+(sum.wCount['PASS']||0) > 0 ? `<div class="pill pill-mute">PASS ${(sum.video.pass||0)+(sum.wCount['PASS']||0)}회 (사유 있음)</div>` : ''}
+          <div class="pill pill-bad">영상 이슈 ${sum.video.issue}회</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openReportSms(){
+  const target = document.getElementById('rep-student').value;
+  const count = target==='all' ? DB.students.length : 1;
+  openModal(`
+    <div class="modal-head"><h3>월간 리포트 문자 발송</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <p style="font-size:13.5px; line-height:1.7;">선택된 <b>${count}명</b>의 학부모에게 월간 리포트 PDF 링크를 문자로 발송합니다. (데모 환경에서는 실제 발송 없이 기록만 남습니다)</p>
+      <div class="field"><label>전달 방식</label>
+        <select id="rep-sms-mode"><option>문자로 파일 발송</option><option>출력하여 등원 시 전달</option></select>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">취소</button><button class="btn btn-brass" onclick="confirmReportSms()">확인</button></div>
+  `);
+}
+function confirmReportSms(){
+  const mode = document.getElementById('rep-sms-mode').value;
+  closeModal();
+  toast(mode==='문자로 파일 발송' ? '문자로 리포트를 발송했어요' : '출력용 화면을 준비했어요 — 상단 [PDF/인쇄] 버튼을 눌러주세요');
+}
+
+/* ---------------------- 14-2. 학기·분기 리포트 (긴 기간 통계 · 반별 비교) ---------------------- */
+
+// start~end(YYYY-MM-DD, 포함) 사이에 걸치는 모든 주차(weekKey) 목록을 반환
+function weeksBetween(start, end){
+  const weeks = [];
+  const seen = new Set();
+  let d = new Date(start);
+  const endDate = new Date(end);
+  while(d<=endDate){
+    const wk = getWeekKey(fmtDate(d));
+    if(!seen.has(wk)){ seen.add(wk); weeks.push(wk); }
+    d.setDate(d.getDate()+1);
+  }
+  return weeks;
+}
+
+function computeTermStats(start, end){
+  const weeks = weeksBetween(start, end);
+  const students = DB.students.filter(s=>(s.status||'재원')==='재원');
+
+  // 반별 집계 초기화
+  const byClass = {};
+  CLASSES.forEach(c=> byClass[c] = { className:c, studentCount:0, redWeeks:0, yellowWeeks:0, greenWeeks:0, totalWeeks:0, scoreSum:0, scoreCount:0, writingOk:0, writingTotal:0, videoOk:0, videoTotal:0 });
+
+  students.forEach(s=>{
+    byClass[s.className].studentCount++;
+    weeks.forEach(wk=>{
+      const g = computeWeeklyGrade(s.id, wk);
+      if(!g.hasAnyRecord) return;
+      byClass[s.className].totalWeeks++;
+      if(g.grade==='red') byClass[s.className].redWeeks++;
+      else if(g.grade==='yellow') byClass[s.className].yellowWeeks++;
+      else byClass[s.className].greenWeeks++;
+    });
+  });
+
+  // 기간 내 시험 점수 평균 (반별)
+  DB.examRecords.filter(r=> r.date>=start && r.date<=end && r.score!=null).forEach(r=>{
+    const s = studentById(r.studentId); if(!s) return;
+    byClass[s.className].scoreSum += r.score;
+    byClass[s.className].scoreCount++;
+  });
+
+  // 기간 내 숙제 제출 현황 (반별)
+  DB.homeworkRecords.filter(r=> r.date>=start && r.date<=end).forEach(r=>{
+    const s = studentById(r.studentId); if(!s) return;
+    if(r.status==='PASS') return;   // 사유 있는 건은 제출률 계산에서 아예 빼서 불이익이 없게 합니다
+    if(r.type==='writing'){
+      byClass[s.className].writingTotal++;
+      if(r.status==='제출완료') byClass[s.className].writingOk++;
+    } else if(r.type.startsWith('video_')){
+      byClass[s.className].videoTotal++;
+      if(r.status==='정상제출') byClass[s.className].videoOk++;
+    }
+  });
+
+  const classRows = CLASSES.map(c=>{
+    const b = byClass[c];
+    const riskRate = b.totalWeeks>0 ? Math.round((b.redWeeks+b.yellowWeeks*0.5)/b.totalWeeks*100) : null;
+    const avgScore = b.scoreCount>0 ? Math.round(b.scoreSum/b.scoreCount*10)/10 : null;
+    const writingRate = b.writingTotal>0 ? Math.round(b.writingOk/b.writingTotal*100) : null;
+    const videoRate = b.videoTotal>0 ? Math.round(b.videoOk/b.videoTotal*100) : null;
+    return Object.assign({}, b, {riskRate, avgScore, writingRate, videoRate});
+  }).filter(r=>r.studentCount>0);
+
+  // 전체 요약
+  const totalWeeksAll = classRows.reduce((a,r)=>a+r.totalWeeks,0);
+  const totalRedAll = classRows.reduce((a,r)=>a+r.redWeeks,0);
+  const totalYellowAll = classRows.reduce((a,r)=>a+r.yellowWeeks,0);
+  const overallRiskRate = totalWeeksAll>0 ? Math.round((totalRedAll+totalYellowAll*0.5)/totalWeeksAll*100) : 0;
+  const scoreAllSum = classRows.reduce((a,r)=>a+(r.scoreCount? r.avgScore*r.scoreCount:0),0);
+  const scoreAllCount = classRows.reduce((a,r)=>a+r.scoreCount,0);
+  const overallAvgScore = scoreAllCount>0 ? Math.round(scoreAllSum/scoreAllCount*10)/10 : null;
+
+  // 주차별 추이 (전체 학생 합산)
+  const weeklyTrend = weeks.map(wk=>{
+    let g=0,y=0,r=0;
+    students.forEach(s=>{
+      const grade = computeWeeklyGrade(s.id, wk);
+      if(!grade.hasAnyRecord) return;
+      if(grade.grade==='red') r++; else if(grade.grade==='yellow') y++; else g++;
+    });
+    return {weekKey:wk, green:g, yellow:y, red:r, total:g+y+r};
+  });
+
+  return { weeks, classRows, overallRiskRate, overallAvgScore, studentCount: students.length, weeklyTrend };
+}
+
+function renderTermReport(root){
+  const today = fmtDate(new Date());
+  const threeMonthsAgo = fmtDate(new Date(Date.now()-90*86400000));
+  root.innerHTML = `
+    <div class="card no-print" style="margin-bottom:20px;">
+      <div class="card-pad">
+        <div class="toolbar" style="margin-bottom:0;">
+          <div class="chip-filter active" data-p="3m" onclick="setTermPreset('3m', this)">최근 3개월</div>
+          <div class="chip-filter" data-p="6m" onclick="setTermPreset('6m', this)">최근 6개월</div>
+          <div class="chip-filter" data-p="all" onclick="setTermPreset('all', this)">전체 기간</div>
+          <div style="flex:1"></div>
+          <input type="date" id="term-start" value="${threeMonthsAgo}" onchange="drawTermReport()">
+          <span class="muted">~</span>
+          <input type="date" id="term-end" value="${today}" onchange="drawTermReport()">
+        </div>
+      </div>
+    </div>
+    <div id="term-area"></div>
+  `;
+  drawTermReport();
+}
+
+function setTermPreset(p, el){
+  document.querySelectorAll('#content-root .chip-filter').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  const end = fmtDate(new Date());
+  let start;
+  if(p==='3m') start = fmtDate(new Date(Date.now()-90*86400000));
+  else if(p==='6m') start = fmtDate(new Date(Date.now()-180*86400000));
+  else { // 전체: 가장 오래된 기록 날짜부터
+    const allDates = [...DB.examRecords.map(r=>r.date), ...DB.homeworkRecords.map(r=>r.date)].filter(Boolean).sort();
+    start = allDates.length? allDates[0] : end;
+  }
+  document.getElementById('term-start').value = start;
+  document.getElementById('term-end').value = end;
+  drawTermReport();
+}
+
+function drawTermReport(){
+  const start = document.getElementById('term-start').value;
+  const end = document.getElementById('term-end').value;
+  const area = document.getElementById('term-area');
+  if(!start || !end || start>end){
+    area.innerHTML = `<div class="card"><div class="card-pad"><div class="empty-state">시작일이 종료일보다 늦어요. 날짜를 다시 확인해주세요.</div></div></div>`;
+    return;
+  }
+  const stats = computeTermStats(start, end);
+
+  if(stats.weeks.length===0 || stats.classRows.every(r=>r.totalWeeks===0)){
+    area.innerHTML = `<div class="card"><div class="card-pad"><div class="empty-state">이 기간에는 아직 쌓인 데이터가 없어요. 데이터가 몇 주 이상 쌓이면 의미 있는 비교가 가능해요.</div></div></div>`;
+    return;
+  }
+
+  const maxRisk = Math.max(...stats.classRows.map(r=>r.riskRate||0), 1);
+  const sortedByRisk = stats.classRows.slice().sort((a,b)=> (b.riskRate||0)-(a.riskRate||0));
+  const maxTrend = Math.max(...stats.weeklyTrend.map(t=>t.total), 1);
+
+  area.innerHTML = `
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-bar ink"></div><div class="stat-label">분석 기간</div><div class="stat-num" style="font-size:16px;">${start.slice(5)} ~ ${end.slice(5)}</div><div class="stat-sub">${stats.weeks.length}주 · 재원 ${stats.studentCount}명</div></div>
+      <div class="stat-card"><div class="stat-bar red"></div><div class="stat-label">전체 위험도 지수</div><div class="stat-num">${stats.overallRiskRate}%</div><div class="stat-sub">빨강 100% + 노랑 50% 가중 평균</div></div>
+      <div class="stat-card"><div class="stat-bar amber"></div><div class="stat-label">기간 내 시험 평균</div><div class="stat-num">${stats.overallAvgScore!=null? stats.overallAvgScore+'점':'-'}</div><div class="stat-sub">점수형 시험 전체 평균</div></div>
+      <div class="stat-card"><div class="stat-bar green"></div><div class="stat-label">최다 관찰 반</div><div class="stat-num" style="font-size:22px;">${sortedByRisk[0]? sortedByRisk[0].className+'반' : '-'}</div><div class="stat-sub">${sortedByRisk[0]? '위험도 '+sortedByRisk[0].riskRate+'%':''}</div></div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header">
+        <div><h3>반별 비교</h3><div class="hint">위험도가 높은 순으로 정렬했어요 — 특정 반이 유독 높다면 커리큘럼·조교 배치를 점검해볼 만해요</div></div>
+      </div>
+      <div class="card-pad">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>반</th><th>인원</th><th style="min-width:160px;">위험도</th><th>시험 평균</th><th>쓰기숙제 제출률</th><th>영상숙제 정상률</th></tr></thead>
+            <tbody>
+              ${sortedByRisk.map(r=>`
+                <tr>
+                  <td><span class="badge badge-class">${classLabel(r.className)}</span></td>
+                  <td class="muted">${r.studentCount}명</td>
+                  <td>
+                    <div class="flex gap-8">
+                      <div style="flex:1; background:#efece3; border-radius:6px; height:8px; overflow:hidden;">
+                        <div style="width:${maxRisk? (r.riskRate||0)/maxRisk*100:0}%; height:100%; background:${(r.riskRate||0)>=50?'var(--red)':(r.riskRate||0)>=25?'var(--amber)':'var(--green)'};"></div>
+                      </div>
+                      <span class="mono" style="font-size:12px; width:38px; text-align:right;">${r.riskRate!=null? r.riskRate+'%':'-'}</span>
+                    </div>
+                  </td>
+                  <td class="muted">${r.avgScore!=null? r.avgScore+'점':'-'}</td>
+                  <td class="muted">${r.writingRate!=null? r.writingRate+'%':'-'}</td>
+                  <td class="muted">${r.videoRate!=null? r.videoRate+'%':'-'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h3>주차별 위험군 추이</h3><div class="hint">전체 학생 기준, 매주 정상(초록)·주의(노랑)·위험(빨강) 인원 변화</div></div>
+      <div class="card-pad">
+        <div style="display:flex; align-items:flex-end; gap:4px; height:160px; overflow-x:auto; padding-bottom:6px;">
+          ${stats.weeklyTrend.map(t=>{
+            const h = maxTrend? (t.total/maxTrend*130) : 0;
+            const gH = t.total? t.green/t.total*h : 0;
+            const yH = t.total? t.yellow/t.total*h : 0;
+            const rH = t.total? t.red/t.total*h : 0;
+            return `<div style="display:flex; flex-direction:column; align-items:center; gap:4px; flex-shrink:0; width:26px;" title="${t.weekKey}: 정상 ${t.green}·주의 ${t.yellow}·위험 ${t.red}">
+              <div style="display:flex; flex-direction:column-reverse; width:16px; height:130px; justify-content:flex-start;">
+                <div style="height:${gH}px; background:var(--green); width:100%;"></div>
+                <div style="height:${yH}px; background:var(--amber); width:100%;"></div>
+                <div style="height:${rH}px; background:var(--red); width:100%;"></div>
+              </div>
+              <div class="muted" style="font-size:9.5px; writing-mode:vertical-rl; text-orientation:mixed;">${t.weekKey.slice(6)}</div>
+            </div>`;
+          }).join('')}
+        </div>
+        <div class="legend" style="margin-top:10px;">
+          <div class="item"><span class="dot" style="background:var(--green)"></span>정상</div>
+          <div class="item"><span class="dot" style="background:var(--amber)"></span>주의</div>
+          <div class="item"><span class="dot" style="background:var(--red)"></span>위험</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ---------------------- 15. 설정 ---------------------- */
+
+function renderSettings(root){
+  const st = DB.settings;
+  const pins = st.rolePins || {};
+  root.innerHTML = `
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header">
+        <div><h3>역할 잠금 (PIN)</h3><div class="hint">역할 선택 화면에 간단한 숫자 PIN을 걸어, 아무나 다른 역할을 눌러 들어가지 못하게 해요</div></div>
+      </div>
+      <div class="card-pad">
+        <div class="field-row">
+          <div class="field"><label>원장</label><input id="pin-director" type="text" inputmode="numeric" placeholder="비워두면 잠금 없음" value="${esc(pins.director||'')}" maxlength="8"></div>
+          <div class="field"><label>시험·쓰기숙제 조교</label><input id="pin-exam_teacher" type="text" inputmode="numeric" placeholder="비워두면 잠금 없음" value="${esc(pins.exam_teacher||'')}" maxlength="8"></div>
+        </div>
+        <div class="field"><label>영상숙제 조교</label><input id="pin-video_teacher" type="text" inputmode="numeric" placeholder="비워두면 잠금 없음" value="${esc(pins.video_teacher||'')}" style="max-width:260px;" maxlength="8"></div>
+        <button class="btn btn-primary" onclick="saveRolePins()">저장</button>
+        <div class="muted" style="font-size:11.5px; margin-top:10px; line-height:1.6;">
+          ※ 이건 "아무나 다른 역할 화면을 클릭해서 못 들어가게" 막는 간단한 잠금이에요. 실제 비밀번호 인증·암호화 같은 보안 기능은 아니라서, 화면을 직접 들여다보거나 이 파일 자체에 접근하면 우회할 수 있어요. 진짜 보안이 필요하시면 정식 로그인 시스템 개발이 필요해요.
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header">
+        <div><h3>휴무일 관리</h3><div class="hint">공휴일·방학 등으로 학원 문을 안 여는 날을 미리 등록해두면, 그날은 미체크 경고가 뜨지 않아요</div></div>
+      </div>
+      <div class="card-pad">
+        <div class="field-row">
+          <div class="field"><label>날짜</label><input type="date" id="hol-date" value="${fmtDate(new Date())}"></div>
+          <div class="field"><label>사유 (선택)</label><input id="hol-label" placeholder="예: 설날 연휴, 여름방학"></div>
+        </div>
+        <button class="btn btn-brass" onclick="addHolidayFromSettings()">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          휴무일 추가</button>
+        <div class="divider"></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>날짜</th><th>사유</th><th></th></tr></thead>
+            <tbody>
+              ${DB.holidays.length===0? `<tr><td colspan="3"><div class="empty-state">등록된 휴무일이 없어요</div></td></tr>` :
+                DB.holidays.slice().sort((a,b)=>a.date<b.date?-1:1).map(h=>`
+                  <tr>
+                    <td style="font-weight:600;">${h.date}</td>
+                    <td class="muted">${esc(h.label||'-')}</td>
+                    <td><button class="btn btn-ghost btn-sm" style="color:var(--red);" onclick="removeHolidayFromSettings('${h.date}')">삭제</button></td>
+                  </tr>
+                `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header">
+        <div><h3>엑셀 경영 대시보드 한 번에 다운로드</h3><div class="hint">버튼 하나로 완성된 .xlsx 파일이 바로 만들어져요 — 붙여넣기 필요 없음</div></div>
+      </div>
+      <div class="card-pad">
+        <button class="btn btn-brass" onclick="exportExcelDashboard()" id="btn-excel-dash">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 4h11l5 5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 13v4M12 11v6M15 13v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          엑셀 경영 대시보드 다운로드 (.xlsx)</button>
+        <div class="muted" style="font-size:12px; margin-top:12px; line-height:1.6;">
+          · 지금 화면의 "경영 대시보드"와 같은 내용(재원 현황, 위험군, 반별 분포, 학교별 분포, 유입경로, 최근 퇴원)이 엑셀 파일 하나로 만들어져요.<br>
+          · 반별·학교별 분포는 숫자 옆에 막대 모양으로 크기를 표시해요. (브라우저에서 직접 만드는 파일이라, 마우스로 움직이는 진짜 차트 객체는 지원되지 않아요 — 필요하시면 엑셀에서 이 데이터로 차트를 새로 그리시면 돼요)<br>
+          · 원생 목록 전체도 두 번째 시트에 같이 담겨요.
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header">
+        <div><h3>엑셀 경영 대시보드용 데이터 내보내기</h3><div class="hint">엑셀 대시보드 템플릿의 "학생데이터" 시트에 그대로 붙여넣을 수 있는 CSV예요</div></div>
+      </div>
+      <div class="card-pad">
+        <button class="btn btn-brass" onclick="exportExcelCSV()">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 4h11l5 5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 13l2 2 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          엑셀용 데이터 내보내기 (.csv)</button>
+        <div class="muted" style="font-size:12px; margin-top:12px; line-height:1.6;">
+          · 이름·반·상태·학교·학년·등록일·퇴원일·유입경로·형제자매여부·이번 주 위험등급·관찰필요여부, 총 11개 열이 그대로 나와요.<br>
+          · 다운로드한 CSV를 열어 전체 선택 후 복사 → 엑셀 대시보드의 <b>"학생데이터"</b> 시트 A3칸에 붙여넣으면 대시보드 숫자와 차트가 자동으로 갱신돼요.<br>
+          · 위험등급·관찰필요는 오늘(이번 주) 기준으로 계산돼서 내보낼 때마다 최신 값이 반영돼요.
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header">
+        <div><h3>파일에서 학생 정보 되살리기</h3><div class="hint">백업(.json)이나 엑셀 대시보드(.xlsx)를 그대로 넣으면 지워진 연락처·학교·등록일을 자동으로 채웁니다</div></div>
+      </div>
+      <div class="card-pad">
+        <input type="file" id="stuinfo-file" accept=".json,.xlsx" onchange="restoreStudentInfoFromFile(this.files[0]); this.value='';" style="display:block; margin-bottom:10px;">
+        <div id="stuinfo-status"><span class="pill pill-mute">파일을 선택하면 자동으로 분석합니다</span></div>
+        <div class="muted" style="font-size:11.5px; margin-top:10px;">
+          · 이름이 일치하는 학생의 <b>비어 있는 칸만</b> 채웁니다. 이미 들어 있는 값은 건드리지 않아요.<br>
+          · <b>숙제·시험 체크 기록은 그대로 유지됩니다.</b> 전체 복원과 달리 지금까지 하신 작업이 사라지지 않아요.<br>
+          · 파일 이름 예시 — 남쌤ERC학원_백업_2026-07-20.json / 남쌤ERC_경영대시보드_2026-07-20.xlsx
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header">
+        <div><h3>학부모 연락처 일괄 입력</h3><div class="hint">엑셀이나 메모장에서 복사해 붙여넣으면 이름으로 학생을 찾아 한 번에 채워 넣습니다</div></div>
+      </div>
+      <div class="card-pad">
+        <div style="margin-bottom:8px;"><span class="pill ${DB.students.filter(s=>!s.parentPhone).length>0?'pill-warn':'pill-ok'}">연락처 비어 있는 학생 ${DB.students.filter(s=>!s.parentPhone).length}명 / 전체 ${DB.students.length}명</span></div>
+        <textarea id="contact-import-box" rows="6" oninput="previewContactImport()" placeholder="한 줄에 한 명씩 붙여넣으세요&#10;&#10;김서율&#9;010-1234-5678&#10;박하윤&#9;B&#9;010-2345-6789&#10;&#10;· 엑셀에서 이름·연락처 열을 그대로 복사해 붙여넣으면 됩니다&#10;· 동명이인이 있으면 이름 옆에 반 이름을 넣어주세요" style="width:100%; padding:10px; border-radius:9px; border:1px solid var(--paper-line); font-family:inherit;"></textarea>
+        <div id="contact-import-preview" style="margin:10px 0;"><span class="pill pill-mute">아직 인식된 줄이 없어요</span></div>
+        <button class="btn btn-brass" onclick="applyContactImport()">연락처 일괄 입력하기</button>
+        <div class="muted" style="font-size:11.5px; margin-top:10px;">
+          · 이름이 정확히 일치하는 학생에게만 입력됩니다. 못 찾은 이름은 알려드리니 그것만 직접 넣으시면 돼요.<br>
+          · 기존 연락처가 있으면 새 번호로 바뀝니다.
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header">
+        <div><h3>가짜 기록 정리</h3><div class="hint">예전 버전에서 자동 생성된, 사람이 체크하지 않은 숙제 기록을 찾아 지웁니다</div></div>
+      </div>
+      <div class="card-pad">
+        <div style="margin-bottom:10px;"><span class="pill ${countFakeHomework()>0? 'pill-warn':'pill-ok'}">${countFakeHomework()>0? '자동 생성된 기록 '+countFakeHomework()+'건 발견' : '가짜 기록 없음 — 깨끗합니다'}</span></div>
+        <button class="btn btn-ghost" onclick="cleanupFakeRecords()">가짜 기록 찾아서 정리하기</button>
+        <div class="muted" style="font-size:11.5px; margin-top:10px;">
+          · 사람이 체크한 기록에는 체크한 시각이 함께 저장됩니다. 그 시각이 없는 기록만 골라 지우므로 실제 기록은 지워지지 않아요.<br>
+          · 시험 성적은 이번 수정 이전에 입력한 것과 구분되지 않아, 자동 정리 대상에서 제외했습니다. 22~23일 성적이 이상하면 직접 확인해주세요.
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header">
+        <div><h3>데이터 백업</h3><div class="hint">브라우저 저장소는 캐시 삭제나 기기 변경 시 사라질 수 있어요. 정기적으로 백업해두세요.</div></div>
+      </div>
+      <div class="card-pad">
+        <div class="flex gap-10 wrap">
+          <button class="btn btn-brass" onclick="downloadBackup()">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v13m0 0 4-4m-4 4-4-4M5 21h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            백업 파일 다운로드 (.json)</button>
+          <label class="btn btn-ghost" style="cursor:pointer;">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 21V8m0 0-4 4m4-4 4 4M5 3h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            백업 파일 불러오기(복원)
+            <input type="file" accept="application/json" style="display:none;" onchange="restoreBackup(this.files[0])">
+          </label>
+        </div>
+        <div class="muted" style="font-size:12px; margin-top:12px; line-height:1.6;">
+          · 다운로드하면 학생·시험·숙제 기록이 통째로 하나의 파일(.json)로 저장돼요.<br>
+          · 매주 또는 매월 한 번씩, 다운로드한 파일을 학원 컴퓨터나 클라우드(구글 드라이브 등)에 따로 보관해두시길 권장해요.<br>
+          · 복원은 지금 화면에 있는 데이터를 <b>백업 파일 내용으로 완전히 덮어씁니다</b> — 되돌릴 수 없으니 신중하게 사용하세요.
+        </div>
+        <div style="margin-top:10px;"><span class="pill ${st.lastBackupAt? 'pill-mute':'pill-warn'}">${st.lastBackupAt? '마지막 백업: '+fmtDateKR(new Date(st.lastBackupAt)) : '아직 백업한 적 없음'}</span></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header"><h3>위험군 판정 기준</h3><div class="hint">숫자를 바꾸면 대시보드에 바로 반영됩니다</div></div>
+      <div class="card-pad">
+        <div style="font-size:12.5px; font-weight:700; color:var(--text-soft); text-transform:uppercase; letter-spacing:.4px; margin-bottom:10px;">시험 종류별 합격 기준 점수</div>
+        <div class="field-row">
+          <div class="field"><label>알파 Unit 복습시험</label><input type="number" id="st-th-alpha" value="${(st.examThresholds&&st.examThresholds.alpha)||st.scoreThreshold||70}"></div>
+          <div class="field"><label>월말테스트</label><input type="number" id="st-th-monthly" value="${(st.examThresholds&&st.examThresholds.monthly)||st.scoreThreshold||70}"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>단어시험(뜻쓰기)</label><input type="number" id="st-th-word_meaning" value="${(st.examThresholds&&st.examThresholds.word_meaning)||st.scoreThreshold||70}"></div>
+          <div class="field"><label>파닉스 시험</label><input type="number" id="st-th-phonics" value="${(st.examThresholds&&st.examThresholds.phonics)||st.scoreThreshold||70}"></div>
+        </div>
+        <div class="muted" style="font-size:11.5px; margin-bottom:16px;">※ ERC 원서발표·단어시험(발음)·EVT 보컬레벨은 점수가 아닌 통과/미통과로 판정되어 기준 점수가 필요 없어요.</div>
+        <div class="divider"></div>
+        <div class="field-row">
+          <div class="field"><label>노랑(주의) 처리 — 이슈 몇 건부터</label><input type="number" id="st-yellow" value="${st.yellowIssueCount}"></div>
+          <div class="field"><label>빨강(위험) 처리 — 같은 항목 몇 건 이상 반복 시</label><input type="number" id="st-red" value="${st.redIssueCount}"></div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size:12.5px; font-weight:700; color:var(--text-soft); text-transform:uppercase; letter-spacing:.4px; margin-bottom:10px;">관찰 필요 판정 기준</div>
+        <div class="field-row">
+          <div class="field"><label>최근 몇 주를 볼지</label><input type="number" id="st-watch-window" min="2" max="8" value="${st.watchWindowWeeks||3}"></div>
+          <div class="field"><label>그중 몇 주 이상 노랑·빨강이면 관찰 필요</label><input type="number" id="st-watch-threshold" min="1" max="8" value="${st.watchThreshold||2}"></div>
+        </div>
+        <div class="muted" style="font-size:11.5px; margin-bottom:16px;">예: 3주로 하고 2주로 하면 "최근 3주 중 2주 이상 노랑·빨강"일 때 관찰 필요로 표시돼요.</div>
+        <button class="btn btn-primary" onclick="saveSettings()">저장</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header"><h3>반 이름 코드 관리</h3><div class="hint">여기서 바꾸면 즉시 화면에 반영되고, 백업 파일에도 같이 저장/복원됩니다 — 앞으로는 이 화면만으로 반 이름을 바꿀 수 있어요</div></div>
+      <div class="card-pad">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>기존 반명</th><th>표시 코드</th></tr></thead>
+            <tbody>
+              ${CLASSES.map(c=>`<tr>
+                <td><span class="badge badge-class">${c}</span></td>
+                <td><input id="cc-${c}" value="${esc((st.classDisplayCode&&st.classDisplayCode[c])||CLASS_DISPLAY_CODE_DEFAULT[c]||'')}" style="max-width:160px;"></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+        <div class="muted" style="font-size:11.5px; margin:10px 0 14px;">
+          · 화면에는 "코드+반 (기존 반명)" 형태로 표시됩니다. 예: 위 코드가 4D-25면 → "4D-25반 (A)"<br>
+          · 나중에 기존 반명 괄호를 없애고 싶으시면 말씀해주세요.
+        </div>
+        <button class="btn btn-primary" onclick="saveClassDisplayCodes()">저장</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header"><h3>반별 응시 시험 매칭표</h3><div class="hint">체크박스로 반별 응시 시험을 조정하세요</div></div>
+      <div class="card-pad">
+        <div class="table-wrap">
+
+          <table>
+            <thead><tr><th>반</th>${Object.keys(EXAM_META).map(k=>`<th>${EXAM_META[k].name}</th>`).join('')}</tr></thead>
+            <tbody>
+              ${CLASSES.map(c=>`<tr><td><span class="badge badge-class">${classLabel(c)}</span></td>
+                ${Object.keys(EXAM_META).map(k=>`<td style="text-align:center;"><input type="checkbox" ${CLASS_EXAMS[c].includes(k)?'checked':''} onchange="toggleClassExam('${c}','${k}',this.checked)"></td>`).join('')}
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h3>영상숙제 대상 반</h3><div class="hint">실제 검사지에는 A,B,C,D,E,F,J,K,L,M 10개 반만 있었어요. G·H·I도 영상숙제를 본다면 여기서 체크하세요.</div></div>
+      <div class="card-pad">
+        <div class="flex gap-14 wrap">
+          ${CLASSES.map(c=>`
+            <label class="flex gap-8" style="padding:8px 12px; border:1px solid var(--paper-line); border-radius:9px; font-size:13px; font-weight:600;">
+              <input type="checkbox" ${CLASS_HAS_VIDEO.includes(c)?'checked':''} onchange="toggleClassVideo('${c}',this.checked)"> ${classLabel(c)}
+            </label>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+function exportExcelCSV(){
+  const wk = currentWeekKey();
+  const GRADE_LABEL = {green:'정상', yellow:'주의', red:'위험'};
+  const rows = [["이름","반","상태","학교","학년","등록일","퇴원일","유입경로","형제자매(Y/N)","위험등급","관찰필요(Y/N)"]];
+  DB.students.forEach(s=>{
+    const status = s.status || '재원';
+    let withdrawnAt = '';
+    if(status==='퇴원'){
+      const hist = (DB.statusHistory||[]).filter(h=>h.studentId===s.id && h.toStatus==='퇴원').sort((a,b)=>(b.changedAt||'').localeCompare(a.changedAt||''));
+      if(hist.length) withdrawnAt = (hist[0].changedAt||'').slice(0,10);
+    }
+    const hasSibling = householdOf(s.id).filter(x=>x.id!==s.id).length>0 ? 'Y' : 'N';
+    let riskLabel = '기록없음';
+    if(status==='재원'){
+      const g = computeWeeklyGrade(s.id, wk);
+      riskLabel = g.hasAnyRecord ? (GRADE_LABEL[g.grade]||'기록없음') : '기록없음';
+    }
+    const watchYN = status==='재원' && computeWatchFlag(s.id).watch ? 'Y' : 'N';
+    rows.push([
+      s.name, classCode(s.className), status, s.school||'', s.grade||'',
+      s.registeredAt||'', withdrawnAt, s.referralSource||'', hasSibling, riskLabel, watchYN
+    ]);
+  });
+  const csv = rows.map(r=> r.map(v=>{
+    const str = String(v===undefined||v===null? '' : v);
+    return /[",\n]/.test(str) ? '"'+str.replace(/"/g,'""')+'"' : str;
+  }).join(',')).join('\r\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `남쌤ERC_엑셀용데이터_${fmtDate(new Date())}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  toast('엑셀용 CSV를 다운로드했어요');
+}
+
+function loadExcelJS(){
+  return new Promise((resolve, reject)=>{
+    if(window.ExcelJS){ resolve(); return; }
+    const existing = document.getElementById('exceljs-cdn');
+    if(existing){ existing.addEventListener('load', ()=>resolve()); existing.addEventListener('error', ()=>reject(new Error('load fail'))); return; }
+    const s = document.createElement('script');
+    s.id = 'exceljs-cdn';
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js';
+    s.onload = ()=>resolve();
+    s.onerror = ()=>reject(new Error('ExcelJS 로드 실패'));
+    document.head.appendChild(s);
+  });
+}
+
+// 숫자 크기를 텍스트 막대로 표현 (브라우저에서 직접 만드는 파일이라 진짜 차트 객체 대신 사용)
+function textBar(value, max, width){
+  width = width || 20;
+  const filled = max > 0 ? Math.round((value / max) * width) : 0;
+  return '■'.repeat(Math.max(0, Math.min(width, filled))) + '□'.repeat(Math.max(0, width - filled));
+}
+
+async function exportExcelDashboard(){
+  const btn = document.getElementById('btn-excel-dash');
+  if(btn) btn.disabled = true;
+  toast('엑셀 파일을 만들고 있어요...');
+  try{
+    await loadExcelJS();
+
+    const NAVY = 'FF1F4E78', BRASS = 'FF9C7A3C', CREAM = 'FFF4F1E9', INK = 'FF1F2933', SOFT = 'FF6B7280';
+    const now = new Date();
+    const thisMonth = fmtDate(now).slice(0,7);
+    const active = DB.students.filter(s=>(s.status||'재원')==='재원');
+    const totalActive = active.length;
+    const newThisMonth = DB.students.filter(s=>(s.registeredAt||'').slice(0,7)===thisMonth).length;
+    const withdrawnThisMonth = (DB.statusHistory||[]).filter(h=>h.toStatus==='퇴원' && (h.changedAt||'').slice(0,7)===thisMonth).length;
+
+    const wk = currentWeekKey();
+    let riskCount = 0, watchCount = 0;
+    active.forEach(s=>{
+      const g = computeWeeklyGrade(s.id, wk);
+      const w = computeWatchFlag(s.id);
+      if(g.hasAnyRecord && g.grade==='red') riskCount++;
+      if(w.watch) watchCount++;
+    });
+
+    const classCounts = CLASSES.map(c=>({ label: classCode(c), n: active.filter(s=>s.className===c).length }));
+    const maxClassCount = Math.max(1, ...classCounts.map(x=>x.n));
+
+    const schoolMap = {};
+    active.forEach(s=>{ const sc = (s.school||'').trim() || '학교 미입력'; schoolMap[sc]=(schoolMap[sc]||0)+1; });
+    const schoolList = Object.entries(schoolMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    const maxSchool = Math.max(1, ...schoolList.map(x=>x[1]));
+
+    const chanMap = {};
+    active.forEach(s=>{ const rs=(s.referralSource||'').trim(); if(rs) chanMap[rs]=(chanMap[rs]||0)+1; });
+    const chanEntered = Object.values(chanMap).reduce((a,b)=>a+b,0);
+    const chanList = Object.entries(chanMap).sort((a,b)=>b[1]-a[1]);
+    const chanUnknown = totalActive - chanEntered;
+    const maxChan = Math.max(1, ...chanList.map(x=>x[1]), chanUnknown);
+
+    let siblingCount = 0;
+    active.forEach(s=>{ if(householdOf(s.id).filter(x=>x.id!==s.id).length) siblingCount++; });
+    const siblingPct = totalActive ? Math.round(siblingCount/totalActive*100) : 0;
+
+    const withReg = active.filter(s=>s.registeredAt);
+    let avgMonths = null;
+    if(withReg.length){
+      const total = withReg.reduce((sum,s)=>{
+        const reg = new Date(s.registeredAt);
+        const m = (now.getFullYear()-reg.getFullYear())*12 + (now.getMonth()-reg.getMonth());
+        return sum + Math.max(0,m);
+      },0);
+      avgMonths = Math.round((total/withReg.length)*10)/10;
+    }
+
+    const withdrawals = (DB.statusHistory||[]).filter(h=>h.toStatus==='퇴원')
+      .sort((a,b)=>(b.changedAt||'').localeCompare(a.changedAt||'')).slice(0,8)
+      .map(h=>({ h, s: studentById(h.studentId) }));
+
+    // ---------------- workbook ----------------
+    const wb = new ExcelJS.Workbook();
+    wb.creator = '남쌤 ERC 학원';
+    wb.created = now;
+
+    const dash = wb.addWorksheet('대시보드', { views:[{ showGridLines:false }] });
+    dash.columns = [{width:16},{width:22},{width:12},{width:8},{width:14},{width:14},{width:14},{width:14}];
+
+    const titleRow = dash.getRow(1);
+    dash.mergeCells(1,1,1,8);
+    titleRow.getCell(1).value = '주안 학원 경영 대시보드';
+    titleRow.getCell(1).font = { name:'Malgun Gothic', size:18, bold:true, color:{argb:INK} };
+    dash.mergeCells(2,1,2,8);
+    const subRow = dash.getRow(2);
+    subRow.getCell(1).value = `생성일: ${fmtDate(now)}`;
+    subRow.getCell(1).font = { italic:true, size:10, color:{argb:SOFT} };
+
+    // KPI cards
+    const kpis = [
+      ['재원생 수', totalActive, '전체 등록 '+DB.students.length+'명 중'],
+      ['이번 달 신규', '+'+newThisMonth, thisMonth+' 등록 기준'],
+      ['이번 달 퇴원', '-'+withdrawnThisMonth, thisMonth+' 퇴원 처리 기준'],
+      ['위험군/관찰필요', riskCount+' / '+watchCount, '재원생 기준'],
+    ];
+    let kpiCol = 1;
+    kpis.forEach(([label, val, sub])=>{
+      dash.mergeCells(4, kpiCol, 4, kpiCol+1);
+      dash.mergeCells(5, kpiCol, 5, kpiCol+1);
+      dash.mergeCells(6, kpiCol, 6, kpiCol+1);
+      const l = dash.getCell(4, kpiCol); l.value = label; l.font = { bold:true, size:10, color:{argb:SOFT} };
+      const v = dash.getCell(5, kpiCol); v.value = val; v.font = { name:'Malgun Gothic', size:20, bold:true, color:{argb:INK} };
+      const su = dash.getCell(6, kpiCol); su.value = sub; su.font = { size:9, color:{argb:SOFT} };
+      for(let rr=4; rr<=6; rr++){
+        for(let cc=kpiCol; cc<=kpiCol+1; cc++){
+          dash.getCell(rr,cc).fill = { type:'pattern', pattern:'solid', fgColor:{argb:CREAM} };
+        }
+      }
+      kpiCol += 2;
+    });
+
+    let r = 9;
+    function sectionHeader(text){
+      dash.mergeCells(r,1,r,8);
+      const c = dash.getCell(r,1);
+      c.value = text;
+      c.font = { bold:true, size:13, color:{argb:NAVY} };
+      r += 1;
+    }
+    function tableHeader(cols){
+      cols.forEach((label, i)=>{
+        const c = dash.getCell(r, i+1);
+        c.value = label;
+        c.font = { bold:true, color:{argb:'FFFFFFFF'} };
+        c.fill = { type:'pattern', pattern:'solid', fgColor:{argb:NAVY} };
+        c.alignment = { horizontal:'center', vertical:'middle' };
+      });
+      r += 1;
+    }
+
+    sectionHeader('반별 인원 분포 (재원생 기준)');
+    tableHeader(['반', '인원', '분포']);
+    classCounts.forEach(({label, n})=>{
+      dash.getCell(r,1).value = label;
+      dash.getCell(r,2).value = n;
+      dash.mergeCells(r,3,r,8);
+      const barCell = dash.getCell(r,3);
+      barCell.value = textBar(n, maxClassCount) + '  ' + n + '명';
+      barCell.font = { name:'Consolas', color:{argb:BRASS} };
+      r += 1;
+    });
+    r += 1;
+
+    sectionHeader('학교별 분포 (상위 ' + schoolList.length + '곳)');
+    tableHeader(['학교', '인원', '분포']);
+    schoolList.forEach(([sc, n])=>{
+      dash.getCell(r,1).value = sc;
+      dash.getCell(r,2).value = n;
+      dash.mergeCells(r,3,r,8);
+      const barCell = dash.getCell(r,3);
+      barCell.value = textBar(n, maxSchool) + '  ' + n + '명';
+      barCell.font = { name:'Consolas', color:{argb:NAVY} };
+      r += 1;
+    });
+    if(schoolList.length===0){ dash.getCell(r,1).value = '학교 정보가 입력된 학생이 없어요'; r += 1; }
+    r += 1;
+
+    sectionHeader('유입경로별 신규 등록 분포');
+    tableHeader(['채널', '인원', '분포']);
+    chanList.forEach(([ch, n])=>{
+      dash.getCell(r,1).value = ch;
+      dash.getCell(r,2).value = n;
+      dash.mergeCells(r,3,r,8);
+      const barCell = dash.getCell(r,3);
+      barCell.value = textBar(n, maxChan) + '  ' + n + '명';
+      barCell.font = { name:'Consolas', color:{argb:BRASS} };
+      r += 1;
+    });
+    if(chanUnknown > 0){
+      dash.getCell(r,1).value = '경로 미입력';
+      dash.getCell(r,2).value = chanUnknown;
+      dash.mergeCells(r,3,r,8);
+      dash.getCell(r,3).value = textBar(chanUnknown, maxChan) + '  ' + chanUnknown + '명';
+      dash.getCell(r,3).font = { name:'Consolas', color:{argb:SOFT} };
+      r += 1;
+    }
+    r += 1;
+
+    sectionHeader('형제자매 등록 비율 / 평균 재원 기간');
+    dash.getCell(r,1).value = '형제자매 등록 비율';
+    dash.getCell(r,2).value = siblingPct + '%';
+    dash.getCell(r,4).value = '평균 재원 기간';
+    dash.getCell(r,5).value = avgMonths===null ? '-' : avgMonths+'개월';
+    dash.getRow(r).font = { bold:true };
+    r += 2;
+
+    sectionHeader('최근 퇴원 학생 (최근 8건)');
+    tableHeader(['퇴원일', '이름', '반', '사유']);
+    if(withdrawals.length){
+      withdrawals.forEach(({h,s})=>{
+        dash.getCell(r,1).value = (h.changedAt||'').slice(0,10);
+        dash.getCell(r,2).value = s ? s.name : '(삭제된 학생)';
+        dash.getCell(r,3).value = s ? classCode(s.className) : '';
+        dash.mergeCells(r,4,r,8);
+        dash.getCell(r,4).value = h.note || '-';
+        r += 1;
+      });
+    } else {
+      dash.getCell(r,1).value = '최근 퇴원 기록이 없어요';
+      r += 1;
+    }
+
+    // ---------------- 원생목록 sheet ----------------
+    const list = wb.addWorksheet('원생목록', { views:[{ state:'frozen', ySplit:1, showGridLines:false }] });
+    const listHeaders = ['이름','반','상태','학교','학년','출결번호','학부모 연락처','등록일','유입경로'];
+    list.columns = listHeaders.map(h=>({ header:h, width: h==='학부모 연락처' ? 18 : (h==='학교' ? 14 : 12) }));
+    const hdrRow = list.getRow(1);
+    hdrRow.eachCell(c=>{ c.font = { bold:true, color:{argb:'FFFFFFFF'} }; c.fill = { type:'pattern', pattern:'solid', fgColor:{argb:NAVY} }; c.alignment = { horizontal:'center' }; });
+    DB.students.forEach(s=>{
+      list.addRow([
+        s.name, classCode(s.className), s.status||'재원', s.school||'', s.grade||'',
+        s.attendanceNo||'', s.parentPhone||'', s.registeredAt||'', s.referralSource||'',
+      ]);
+    });
+
+    const buf = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buf], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `남쌤ERC_경영대시보드_${fmtDate(now)}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    toast('엑셀 대시보드를 다운로드했어요');
+  }catch(e){
+    console.error('엑셀 생성 실패', e);
+    toast('엑셀 파일 생성에 실패했어요. 인터넷 연결을 확인하고 다시 시도해주세요.', true);
+  }finally{
+    if(btn) btn.disabled = false;
+  }
+}
+
+/* ==========================================================================
+   파일에서 학생 정보 자동 복구
+   백업(.json) 또는 엑셀 경영 대시보드(.xlsx)를 그대로 넣으면
+   연락처·학교·주소·등록일 등 지워진 정보만 골라서 되살립니다.
+   (숙제·시험 기록은 건드리지 않습니다 — 지금까지 하신 체크는 그대로 유지됩니다)
+   ========================================================================== */
+const RESTORE_FIELDS = {
+  parentPhone:'학부모 연락처', studentPhone:'학생 연락처', school:'학교', grade:'학년',
+  attendanceNo:'출결번호', registeredAt:'등록일', address:'주소',
+  referralSource:'유입경로', notes:'특이사항'
+};
+
+function _cell(v){
+  if(v==null) return '';
+  if(typeof v==='object'){
+    if(v.text!=null) return String(v.text).trim();
+    if(v.result!=null) return String(v.result).trim();
+    if(v instanceof Date) return fmtDate(v);
+    return '';
+  }
+  return String(v).trim();
+}
+
+async function _rowsFromJson(file){
+  const obj = JSON.parse(await file.text());
+  const arr = (obj && obj.students) || (obj && obj.data && obj.data.students) || [];
+  if(!Array.isArray(arr) || !arr.length) throw new Error('이 파일에는 학생 정보가 없어요');
+  return arr.map(s=>{
+    const f = {};
+    Object.keys(RESTORE_FIELDS).forEach(k=>{ if(s[k]) f[k] = String(s[k]).trim(); });
+    return { name:(s.name||'').trim(), hint:(s.className||'').trim(), fields:f };
+  }).filter(r=>r.name);
+}
+
+async function _rowsFromXlsx(file){
+  await loadExcelJS();
+  const wb = new ExcelJS.Workbook();
+  await wb.xlsx.load(await file.arrayBuffer());
+  const ws = wb.getWorksheet('원생목록') || wb.worksheets[0];
+  if(!ws) throw new Error('시트를 찾을 수 없어요');
+  const HEAD = { '이름':'name', '반':'hint', '학교':'school', '학년':'grade',
+                 '출결번호':'attendanceNo', '학부모 연락처':'parentPhone', '학부모연락처':'parentPhone',
+                 '학생 연락처':'studentPhone', '등록일':'registeredAt', '유입경로':'referralSource',
+                 '주소':'address', '특이사항':'notes' };
+  const colMap = {};
+  ws.getRow(1).eachCell((c,i)=>{ const k = HEAD[_cell(c.value)]; if(k) colMap[i]=k; });
+  if(!Object.values(colMap).includes('name')) throw new Error('이름 열을 찾을 수 없어요');
+  const rows = [];
+  ws.eachRow((row, n)=>{
+    if(n===1) return;
+    const r = { name:'', hint:'', fields:{} };
+    row.eachCell((c,i)=>{
+      const key = colMap[i]; if(!key) return;
+      const v = _cell(c.value); if(!v) return;
+      if(key==='name') r.name = v;
+      else if(key==='hint') r.hint = v;
+      else r.fields[key] = v;
+    });
+    if(r.name) rows.push(r);
+  });
+  return rows;
+}
+
+async function restoreStudentInfoFromFile(file){
+  if(!file) return;
+  const status = document.getElementById('stuinfo-status');
+  const setMsg = (html)=>{ if(status) status.innerHTML = html; };
+  setMsg('<span class="pill pill-mute">파일을 읽는 중…</span>');
+  let rows;
+  try{
+    const lower = file.name.toLowerCase();
+    if(lower.endsWith('.json'))      rows = await _rowsFromJson(file);
+    else if(lower.endsWith('.xlsx')) rows = await _rowsFromXlsx(file);
+    else throw new Error('.json 백업 파일 또는 .xlsx 엑셀 파일만 넣을 수 있어요');
+  }catch(e){
+    console.error(e);
+    setMsg('<span class="pill pill-bad">읽기 실패 — ' + esc(e.message||'') + '</span>');
+    return;
+  }
+
+  const filled = {}, notFound = [], ambiguous = [];
+  let touched = 0;
+  const plan = [];
+  rows.forEach(r=>{
+    // 1차: 이름 완전 일치
+    let cands = DB.students.filter(x=> x.name===r.name);
+    let bySuffix = false;
+    // 2차: 파일에는 성이 있고(김민채) 앱에는 성이 없는(민채) 경우 — 뒷부분이 일치하면 같은 학생으로 봅니다
+    if(cands.length===0 && r.name.length>=3){
+      cands = DB.students.filter(x=> x.name && r.name.length>x.name.length && r.name.length-x.name.length<=2 && r.name.endsWith(x.name));
+      bySuffix = cands.length>0;
+    }
+    if(cands.length>1 && r.hint){
+      const nar = cands.filter(c=> c.className===r.hint || classLabel(c.className)===r.hint);
+      if(nar.length) cands = nar;
+    }
+    if(cands.length===0){ notFound.push(r.name); return; }
+    if(cands.length>1){ ambiguous.push(r.name); return; }
+    const stu = cands[0], changes = {};
+    // 성이 빠진 이름이면 파일에 있는 성 포함 이름으로 되살립니다
+    if(bySuffix){ changes.name = r.name; filled.name = (filled.name||0)+1; }
+    Object.keys(r.fields).forEach(k=>{
+      if(!stu[k] && r.fields[k]){ changes[k] = r.fields[k]; filled[k]=(filled[k]||0)+1; }
+    });
+    if(Object.keys(changes).length){ plan.push({stu, changes}); touched++; }
+  });
+
+  if(!touched){
+    setMsg('<span class="pill pill-mute">채울 빈칸이 없어요 — 이미 정보가 들어 있거나 이름이 일치하지 않습니다</span>');
+    return;
+  }
+  const detail = Object.keys(filled).map(k=> '   · ' + (k==='name' ? '이름 (성 되살림)' : RESTORE_FIELDS[k]) + '  —  ' + filled[k] + '명').join('\n');
+  let msg = '학생 ' + touched + '명의 비어 있는 정보를 되살립니다.\n\n' + detail;
+  if(notFound.length)  msg += '\n\n· 이름을 못 찾음 (' + notFound.length + '명): ' + notFound.slice(0,10).join(', ') + (notFound.length>10?' 외':'');
+  if(ambiguous.length) msg += '\n· 동명이인이라 건너뜀: ' + ambiguous.join(', ');
+  msg += '\n\n※ 이미 값이 있는 칸은 건드리지 않습니다.\n※ 숙제·시험 기록은 그대로 유지됩니다.\n\n진행할까요?';
+  if(!confirm(msg)){ setMsg('<span class="pill pill-mute">취소했어요</span>'); return; }
+
+  plan.forEach(pp=> Object.assign(pp.stu, pp.changes));
+  const ok = await saveDB();
+  if(ok){
+    toast('학생 ' + touched + '명의 정보를 되살렸어요');
+    const inner = document.getElementById('view-inner');
+    if(inner && currentView==='settings') renderSettings(inner);
+  }
+}
+
+/* ==========================================================================
+   학부모 연락처 일괄 입력
+   엑셀·한글·메모장에서 "이름 / (반) / 연락처" 형태로 복사해 붙여넣으면
+   이름으로 학생을 찾아 연락처를 한 번에 채워 넣습니다.
+   ========================================================================== */
+function parseContactLines(text){
+  const rows = [];
+  (text||'').split(/\r?\n/).forEach(line=>{
+    if(!line.trim()) return;
+    const cells = line.split(/\t|,|\|/).map(c=>c.trim()).filter(c=>c!=='');
+    if(cells.length < 2) return;
+    let phoneIdx = -1;
+    for(let i=cells.length-1;i>=0;i--){
+      const digits = cells[i].replace(/[^0-9]/g,'');
+      if(digits.length>=9 && digits.length<=11){ phoneIdx = i; break; }
+    }
+    if(phoneIdx < 0) return;
+    const phone = cells[phoneIdx];
+    const rest = cells.filter((_,i)=> i!==phoneIdx);
+    if(!rest.length) return;
+    rows.push({ name: rest[0], hint: (rest[1]||''), phone });
+  });
+  return rows;
+}
+
+function previewContactImport(){
+  const rows = parseContactLines(document.getElementById('contact-import-box').value);
+  const el = document.getElementById('contact-import-preview');
+  if(!rows.length){ el.innerHTML = '<span class="pill pill-mute">아직 인식된 줄이 없어요</span>'; return; }
+  let ok=0, none=0, dup=0;
+  rows.forEach(r=>{
+    const cands = DB.students.filter(s=> s.name===r.name);
+    if(cands.length===0) none++;
+    else if(cands.length>1 && !cands.some(c=> r.hint && (c.className===r.hint || classLabel(c.className)===r.hint))) dup++;
+    else ok++;
+  });
+  el.innerHTML = `<span class="pill pill-ok">입력 가능 ${ok}명</span> `
+    + (none? `<span class="pill pill-warn">이름 못 찾음 ${none}명</span> `:'')
+    + (dup? `<span class="pill pill-warn">동명이인 ${dup}명 (반 이름을 같이 넣어주세요)</span>`:'');
+}
+
+async function applyContactImport(){
+  const rows = parseContactLines(document.getElementById('contact-import-box').value);
+  if(!rows.length){ toast('인식된 줄이 없어요. 이름과 연락처가 같은 줄에 있어야 합니다.', true); return; }
+  const applied=[], notFound=[], ambiguous=[];
+  rows.forEach(r=>{
+    let cands = DB.students.filter(s=> s.name===r.name);
+    if(cands.length>1 && r.hint){
+      const narrowed = cands.filter(c=> c.className===r.hint || classLabel(c.className)===r.hint);
+      if(narrowed.length) cands = narrowed;
+    }
+    if(cands.length===0){ notFound.push(r.name); return; }
+    if(cands.length>1){ ambiguous.push(r.name); return; }
+    applied.push({ stu:cands[0], phone:r.phone });
+  });
+  if(!applied.length){ toast('연결된 학생이 없어요. 이름이 정확한지 확인해주세요.', true); return; }
+  let msg = '학부모 연락처 ' + applied.length + '명을 입력합니다.\n';
+  if(notFound.length)  msg += '\n· 이름을 못 찾음 (' + notFound.length + '명): ' + notFound.slice(0,10).join(', ') + (notFound.length>10?' 외':'');
+  if(ambiguous.length) msg += '\n· 동명이인이라 건너뜀 (' + ambiguous.length + '명): ' + ambiguous.join(', ');
+  msg += '\n\n진행할까요?';
+  if(!confirm(msg)) return;
+  applied.forEach(a=>{ a.stu.parentPhone = a.phone; });
+  const ok = await saveDB();
+  if(ok){
+    toast(applied.length + '명의 학부모 연락처를 입력했어요');
+    document.getElementById('contact-import-box').value = '';
+    const inner = document.getElementById('view-inner');
+    if(inner && currentView==='settings') renderSettings(inner);
+  }
+}
+
+// 사람이 체크하지 않은(자동 생성된) 숙제 기록만 골라서 정리합니다.
+// 실제로 체크한 기록에는 항상 updatedAt(체크한 시각)이 붙어 있으므로 안전하게 구분됩니다.
+function countFakeHomework(){
+  return (DB.homeworkRecords||[]).filter(r=> r && !r.updatedAt).length;
+}
+async function cleanupFakeRecords(){
+  const fake = (DB.homeworkRecords||[]).filter(r=> r && !r.updatedAt);
+  if(fake.length===0){ toast('자동 생성된 가짜 숙제 기록이 없어요 👍'); return; }
+  const byDate = {};
+  fake.forEach(r=>{ const d = r.date || '(날짜없음)'; byDate[d] = (byDate[d]||0)+1; });
+  const lines = Object.keys(byDate).sort().map(d=> '   · ' + d + '  —  ' + byDate[d] + '건').join('\n');
+  if(!confirm('사람이 체크하지 않은 숙제 기록을 찾았어요.\n\n총 ' + fake.length + '건\n\n' + lines +
+    '\n\n모두 삭제할까요? 되돌릴 수 없습니다.\n※ 먼저 위쪽 [백업 파일 다운로드]를 받아두시길 권합니다.')) return;
+  DB.homeworkRecords = DB.homeworkRecords.filter(r=> r && r.updatedAt);
+  _allowBigDelete = true;
+  const ok = await saveDB();
+  _allowBigDelete = false;
+  if(ok) toast('가짜 숙제 기록 ' + fake.length + '건을 삭제했어요');
+  const inner = document.getElementById('view-inner');
+  if(inner && currentView==='settings') renderSettings(inner);
+}
+
+function downloadBackup(){
+  const payload = {
+    _meta: { app:'남쌤 ERC 학원 시험·숙제 체크', exportedAt: new Date().toISOString(), version: STORAGE_KEY },
+    data: DB,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const stamp = fmtDate(new Date());
+  a.href = url;
+  a.download = `남쌤ERC학원_백업_${stamp}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  DB.settings.lastBackupAt = new Date().toISOString();
+  saveDB();
+  toast('백업 파일을 다운로드했어요');
+}
+
+async function restoreBackup(file){
+  if(!file) return;
+  if(!confirm('현재 화면의 모든 데이터가 백업 파일 내용으로 완전히 덮어써집니다.\n계속할까요?')){ return; }
+  try{
+    const text = await file.text();
+    const parsed = JSON.parse(text);
+    const incoming = parsed && parsed.data ? parsed.data : parsed; // _meta 래핑 유무 모두 지원
+    if(!incoming || !Array.isArray(incoming.students)){
+      toast('올바른 백업 파일이 아니에요', true);
+      return;
+    }
+    DB = Object.assign({
+      students: [], examRecords: [], homeworkRecords: [], videoNotes: {}, videoComments: {}, remedial: {},
+      classHistory: [], statusHistory: [], holidays: [],
+      settings: { scoreThreshold:70, examThresholds:{alpha:70,monthly:70,word_meaning:70,phonics:70}, yellowIssueCount:1, redIssueCount:2, videoClasses: CLASS_HAS_VIDEO.slice(), rolePins:{director:'',exam_teacher:'',video_teacher:''}, watchWindowWeeks:3, watchThreshold:2 },
+    }, incoming);
+    if(DB.settings && DB.settings.videoClasses && DB.settings.videoClasses.length){
+      CLASS_HAS_VIDEO = DB.settings.videoClasses.slice();
+    }
+    const ok = await saveDB();
+    if(ok){
+      toast('백업 파일을 불러왔어요');
+      renderView(currentView);
+    }
+  }catch(e){
+    console.error(e);
+    toast('파일을 읽는 중 문제가 발생했어요. 올바른 백업 파일인지 확인해주세요.', true);
+  }
+}
+
+async function saveClassDisplayCodes(){
+  const map = {};
+  CLASSES.forEach(c=>{
+    const v = document.getElementById(`cc-${c}`).value.trim();
+    if(v) map[c] = v;
+  });
+  DB.settings.classDisplayCode = map;
+  const ok = await saveDB();
+  renderView('settings');
+  if(ok) toast('반 이름 코드를 저장했어요');
+}
+async function saveSettings(){
+  DB.settings.examThresholds = {
+    alpha: Number(document.getElementById('st-th-alpha').value)||70,
+    monthly: Number(document.getElementById('st-th-monthly').value)||70,
+    word_meaning: Number(document.getElementById('st-th-word_meaning').value)||70,
+    phonics: Number(document.getElementById('st-th-phonics').value)||70,
+  };
+  DB.settings.yellowIssueCount = Number(document.getElementById('st-yellow').value)||1;
+  DB.settings.redIssueCount = Number(document.getElementById('st-red').value)||2;
+  const watchWindow = Number(document.getElementById('st-watch-window').value)||3;
+  const watchThreshold = Number(document.getElementById('st-watch-threshold').value)||2;
+  if(watchThreshold>watchWindow){
+    toast('관찰 필요 기준(몇 주 이상)이 전체 기간(최근 몇 주)보다 클 수 없어요', true);
+    return;
+  }
+  DB.settings.watchWindowWeeks = watchWindow;
+  DB.settings.watchThreshold = watchThreshold;
+  const ok = await saveDB();
+  if(ok) toast('설정을 저장했어요');
+}
+async function toggleClassExam(cls, examKey, checked){
+  const list = CLASS_EXAMS[cls];
+  if(checked && !list.includes(examKey)) list.push(examKey);
+  if(!checked) CLASS_EXAMS[cls] = list.filter(k=>k!==examKey);
+  toast(`${classLabel(cls)} · ${EXAM_META[examKey].name} ${checked?'추가':'제외'}됨`);
+}
+async function toggleClassVideo(cls, checked){
+  if(checked && !CLASS_HAS_VIDEO.includes(cls)) CLASS_HAS_VIDEO.push(cls);
+  if(!checked) CLASS_HAS_VIDEO = CLASS_HAS_VIDEO.filter(c=>c!==cls);
+  DB.settings.videoClasses = CLASS_HAS_VIDEO.slice();
+  const ok = await saveDB();
+  if(ok) toast(`${classLabel(cls)} 영상숙제 대상 ${checked?'포함':'제외'}됨`);
+}
+
+/* ---------------------- 16. 초기화 ---------------------- */
+
+async function init(){
+  document.getElementById('today-label').textContent = fmtDateKR(new Date());
+  renderLogin();
+  const loaded = await loadDB();
+  if(_loadFailed){
+    // 통신 실패 상태에서 샘플 데이터를 만들어 저장하면 기존 기록이 전부 지워집니다
+    _saveLocked = true;
+    alert('데이터를 불러오지 못했습니다.\n\n인터넷 연결을 확인한 뒤 페이지를 새로고침해 주세요.\n(기존 기록을 보호하기 위해 저장을 잠갔습니다.)');
+    return;
+  }
+  if(!loaded || !DB.students || DB.students.length===0){
+    // [중요] 예전에는 여기서 자동으로 샘플 데이터를 만들어 저장했습니다.
+    // 그 순간 실제 시험·숙제 기록이 전부 지워지고, 오늘 날짜에 가짜 체크가 생겼습니다.
+    // 이제는 절대 자동으로 만들지 않습니다.
+    _saveLocked = true;
+    alert('저장된 데이터를 찾지 못했습니다.\n\n아무것도 입력하지 마시고, 먼저 페이지를 새로고침해 주세요.\n그래도 비어 있으면 백업 파일로 복원하세요.\n(기존 기록 보호를 위해 저장을 잠갔습니다.)');
+    return;
+  }
+  if(DB.settings.videoClasses && DB.settings.videoClasses.length){
+    CLASS_HAS_VIDEO = DB.settings.videoClasses.slice();
+  } else {
+    DB.settings.videoClasses = CLASS_HAS_VIDEO.slice();
+  }
+  startRealtimeSync();
+}
+init();
+</script>
+</body>
+</html>
